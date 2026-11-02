@@ -1,0 +1,31 @@
+PadelYa - Prototipo Sprint 1
+============================
+
+Como abrirlo: descomprimir la carpeta y abrir index.html con doble click (no necesita servidor).
+
+Pantallas
+  index.html               inicio
+  registro.html            PB-01 registrarse
+  login.html               PB-02 iniciar sesion
+  canchas.html             PB-03 listado de canchas activas
+  disponibilidad.html      PB-04 disponibilidad por fecha + PB-05 reservar + PB-06 sin duplicados
+  reserva-confirmada.html  resumen de la reserva
+  docs/index.html            documentación del sprint:
+    docs/casos-de-uso.html     casos de uso del jugador y del administrador (ITU-20)
+    docs/diagrama-clases.html  diagrama de clases (Usuario, Cancha, Reserva, Bloqueo) (ITU-21)
+    docs/modelo-de-datos.html  tablas, restricciones, SQL equivalente y entorno (ITU-22)
+    docs/flujo-github.html     ramas, commits y Pull Requests (ITU-19)
+
+Archivos JS
+  js/utils.js    fechas, mensajes, barra de arriba
+  js/datos.js    guarda y lee todo (localStorage). Es lo unico que habria que cambiar si usamos una base de datos
+  js/auth.js     registro, login, logout, control de sesion
+  js/canchas.js  funciones de canchas
+  js/reservas.js turnos, disponibilidad y reservas
+  js/pantallas/  un archivo por pantalla (solo conecta el html con las funciones de arriba)
+
+Para probarlo
+  - Usuario de prueba: jugador@padelya.com / 123456 (o registrar uno nuevo)
+  - Reservas duplicadas: abrir el sitio en 2 pestanas, loguearse con usuarios distintos, elegir el mismo turno
+    en las dos y confirmar en la primera y despues en la segunda. La segunda avisa y ofrece otros horarios.
+  - "Reiniciar datos de prueba" (abajo de todo) vuelve todo al estado inicial.

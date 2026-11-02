@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flujo de GitHub - PadelYa</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="estilos-docs.css">
+</head>
+<body>
+  <main class="contenedor doc">
+    <a class="volver" href="index.html">&larr; Documentación</a>
+    <section class="tarjeta">
+      <h1>GitHub: ramas y Pull Requests</h1>
+      <p>Reglas simples para que el equipo no se pise y siempre haya una versión que funciona.</p>
+      <h2>Ramas</h2>
+      <div class="tabla"><table>
+        <tr><th>Rama</th><th>Qué contiene</th><th>Quién escribe ahí</th></tr>
+        <tr><td><code>main</code></td><td>Versión estable, la que se entrega al cerrar el sprint.</td><td>Nadie directo. Solo se actualiza con un Pull Request desde <code>develop</code>.</td></tr>
+        <tr><td><code>develop</code></td><td>Integración del sprint: todo lo que ya fue revisado.</td><td>Nadie directo. Solo se actualiza con Pull Requests desde las ramas de tarea.</td></tr>
+        <tr><td><code>feature/ITU-N-descripcion</code></td><td>Una tarea de Jira. Ejemplo: <code>feature/ITU-9-reservar-cancha</code>.</td><td>Quien tenga asignada la tarea.</td></tr>
+      </table></div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Paso a paso para una tarea</h2>
+<pre><code># 1. partir siempre de develop actualizado
+git checkout develop
+git pull origin develop
+
+# 2. crear la rama de la tarea
+git checkout -b feature/ITU-9-reservar-cancha
+
+# 3. trabajar y hacer commits chicos, con la clave de Jira
+git add .
+git commit -m "ITU-9: confirmar reserva de un turno libre"
+
+# 4. subir la rama
+git push -u origin feature/ITU-9-reservar-cancha
+
+# 5. en GitHub: abrir un Pull Request hacia develop
+#    (se completa la plantilla), pedir revisión a un compañero
+
+# 6. con la revisión aprobada: Merge, borrar la rama y mover la tarjeta a Listo en Jira
+git checkout develop
+git pull origin develop</code></pre>
+      <h3>Mensajes de commit</h3>
+      <p>Formato: <code>ITU-N: qué se hizo</code>, en presente y corto. Ejemplos: <code>ITU-10: rechazar turnos ya reservados</code>, <code>ITU-5: validar email repetido</code>.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Reglas de los Pull Requests</h2>
+      <ul>
+        <li>Un Pull Request por tarea, con la clave de Jira en el título.</li>
+        <li>Siempre hacia <code>develop</code>, nunca hacia <code>main</code>.</li>
+        <li>Lo revisa al menos otra persona del equipo antes del merge.</li>
+        <li>Antes de abrirlo: probar la pantalla en el navegador y mirar la consola (F12) sin errores.</li>
+        <li>Se usa "Squash and merge" para que cada tarea quede como un solo commit en <code>develop</code>.</li>
+        <li>Al cerrar el sprint: Pull Request de <code>develop</code> a <code>main</code> y una etiqueta, por ejemplo <code>sprint-1</code>.</li>
+      </ul>
+      <h2>Crear el repositorio</h2>
+<pre><code>cd padelya-sprint1
+git init -b main
+git add .
+git commit -m "Prototipo PadelYa - Sprint 1"
+git remote add origin https://github.com/USUARIO/padelya.git
+git push -u origin main
+
+git checkout -b develop
+git push -u origin develop</code></pre>
+      <p>En GitHub, en Settings &rarr; Branches, proteger <code>main</code> y <code>develop</code> exigiendo Pull Request antes de mergear. El archivo <code>.github/pull_request_template.md</code> de este proyecto se carga solo al abrir un PR.</p>
+    </section>
+  </main>
+</body>
+</html>

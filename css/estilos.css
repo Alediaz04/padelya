@@ -1,0 +1,201 @@
+/* estilos.css
+   estilos de todas las pantallas, lo dejamos en un solo archivo para no repetir */
+
+:root {
+  --azul: #0f2a43;
+  --verde: #16a34a;
+  --verde-oscuro: #128a3e;
+  --lima: #c6f432;
+  --gris: #f3f5f7;
+  --borde: #dde3ea;
+  --texto: #1f2933;
+  --rojo: #d93025;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--gris);
+  color: var(--texto);
+}
+
+/* ---------- barra de arriba ---------- */
+.barra {
+  background: var(--azul);
+  color: #fff;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.logo { font-size: 1.3rem; font-weight: bold; text-decoration: none; color: #fff; }
+.logo span { color: var(--lima); }
+.barra-links { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.barra-links a { color: #fff; text-decoration: none; font-size: 0.95rem; }
+.barra-links a:hover { color: var(--lima); }
+.saludo { font-size: 0.9rem; color: #cfe3f5; }
+.btn-salir {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-salir:hover { background: #fff; color: var(--azul); }
+
+/* ---------- contenedores ---------- */
+.contenedor { width: 100%; max-width: 960px; margin: 0 auto; padding: 24px 16px; flex: 1; }
+.contenedor-chico { max-width: 440px; }
+
+.tarjeta {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+.tarjeta h1, .tarjeta h2 { margin-top: 0; }
+.volver { display: inline-block; margin-bottom: 12px; color: var(--azul); text-decoration: none; font-weight: bold; }
+.volver:hover { text-decoration: underline; }
+.oculto { display: none; }
+
+/* ---------- botones ---------- */
+.btn {
+  display: inline-block;
+  background: var(--verde);
+  color: #fff;
+  border: none;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover { background: var(--verde-oscuro); }
+.btn:disabled { background: #b7c0c7; cursor: not-allowed; }
+.btn-sec { background: #fff; color: var(--azul); border: 2px solid var(--azul); }
+.btn-sec:hover { background: var(--azul); color: #fff; }
+.btn-chico { padding: 7px 14px; font-size: 0.9rem; margin: 4px 6px 0 0; }
+
+/* ---------- inicio ---------- */
+.hero {
+  background: var(--azul);
+  color: #fff;
+  border-radius: 14px;
+  padding: 48px 28px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.hero h1 { margin: 0 0 12px; font-size: 2rem; }
+.hero p { margin: 0 auto 24px; max-width: 520px; color: #cfe3f5; }
+.hero .btn-sec { background: transparent; color: #fff; border-color: #fff; }
+.hero .btn-sec:hover { background: #fff; color: var(--azul); }
+.botones { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+.pasos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.paso { background: #fff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); }
+.paso .numero {
+  width: 40px; height: 40px; line-height: 40px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--lima);
+  color: var(--azul);
+  font-weight: bold;
+}
+.paso h3 { margin: 0 0 6px; }
+.paso p { margin: 0; font-size: 0.9rem; color: #52606d; }
+
+/* ---------- formularios ---------- */
+.campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.campo label { font-weight: bold; font-size: 0.9rem; }
+.campo input {
+  padding: 10px;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+.campo input:focus { outline: 2px solid var(--verde); border-color: var(--verde); }
+.formulario .btn { width: 100%; }
+.ayuda { font-size: 0.85rem; color: #52606d; margin-top: 14px; text-align: center; }
+
+.mensaje { display: none; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; font-weight: bold; font-size: 0.9rem; }
+.mensaje.error { display: block; background: #fde8e6; color: var(--rojo); }
+.mensaje.ok { display: block; background: #e6f6ec; color: var(--verde-oscuro); }
+
+/* ---------- listado de canchas ---------- */
+.titulo-pagina { margin: 0 0 4px; }
+.subtitulo { margin: 0 0 18px; color: #52606d; }
+.grilla-canchas { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+.cancha-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); border-top: 5px solid var(--verde); }
+.cancha-card h2 { margin: 0 0 8px; }
+.cancha-card p { color: #52606d; font-size: 0.9rem; }
+
+.etiqueta { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+.etiqueta.techada { background: #e0ecff; color: #1a5fd0; }
+.etiqueta.descubierta { background: #fff4d6; color: #9a6b00; }
+
+/* ---------- disponibilidad ---------- */
+.fila-fecha { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.fila-fecha .campo { margin-bottom: 0; }
+.texto-fecha { margin: 12px 0 0; color: #52606d; }
+
+.leyenda { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem; margin-bottom: 14px; }
+.leyenda span::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.leyenda .l-libre::before { background: #e6f6ec; border: 2px solid var(--verde); }
+.leyenda .l-ocupado::before { background: #fde8e6; border: 2px solid var(--rojo); }
+.leyenda .l-pasado::before { background: #eceff1; border: 2px solid #b0bec5; }
+
+.resumen { font-size: 0.9rem; color: #52606d; margin: 0 0 12px; }
+.horarios { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.horario {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  font-size: 1rem;
+}
+.horario small { font-size: 0.75rem; }
+.horario.libre { background: #e6f6ec; border-color: var(--verde); color: var(--verde-oscuro); cursor: pointer; }
+.horario.libre:hover { background: var(--verde); color: #fff; }
+.horario.ocupado { background: #fde8e6; border-color: var(--rojo); color: var(--rojo); }
+.horario.pasado { background: #eceff1; border-color: #b0bec5; color: #78909c; }
+.horario:disabled { cursor: not-allowed; }
+.horario.elegido { background: var(--azul); border-color: var(--azul); color: #fff; }
+
+.confirmar { border: 2px solid var(--azul); }
+.detalle { margin: 0 0 16px; }
+.detalle dt { font-size: 0.8rem; color: #52606d; margin-top: 10px; }
+.detalle dd { margin: 2px 0 0; font-weight: bold; font-size: 1.05rem; }
+.acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+.alternativas p { margin: 0 0 4px; font-size: 0.9rem; }
+.alternativas { margin-bottom: 14px; }
+
+/* ---------- reserva confirmada ---------- */
+.centrada { text-align: center; }
+.check {
+  width: 70px; height: 70px; line-height: 70px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: #fff;
+  font-size: 2.2rem;
+}
+.centrada .detalle { text-align: left; max-width: 320px; margin: 18px auto; }
+
+/* ---------- pie ---------- */
+.pie { text-align: center; padding: 16px; font-size: 0.8rem; color: #52606d; }
+.pie a { color: var(--azul); }
+
+@media (max-width: 500px) {
+  .hero h1 { font-size: 1.5rem; }
+  .barra { padding: 10px 14px; }
+}

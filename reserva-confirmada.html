@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reserva confirmada - PadelYa</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header id="barra" class="barra"></header>
+
+  <main class="contenedor contenedor-chico">
+    <section class="tarjeta centrada">
+      <div class="check">&#10003;</div>
+      <h1>¡Reserva confirmada!</h1>
+      <p>Tu turno quedó guardado con estos datos:</p>
+
+      <dl class="detalle" id="detalle-reserva"></dl>
+
+      <div class="acciones" style="justify-content:center">
+        <a class="btn" href="canchas.html">Reservar otro turno</a>
+        <a class="btn btn-sec" id="link-disponibilidad" href="canchas.html">Ver la disponibilidad</a>
+      </div>
+    </section>
+  </main>
+
+  <footer id="pie" class="pie"></footer>
+
+  <script src="js/utils.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/canchas.js"></script>
+  <script src="js/reservas.js"></script>
+  <script src="js/pantallas/confirmacion.js"></script>
+</body>
+</html>

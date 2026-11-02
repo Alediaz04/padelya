@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Disponibilidad - PadelYa</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header id="barra" class="barra"></header>
+
+  <main class="contenedor">
+    <a class="volver" href="canchas.html">&larr; Volver a las canchas</a>
+
+    <!-- datos de la cancha y selector de fecha -->
+    <section class="tarjeta">
+      <h1 id="nombre-cancha"></h1>
+      <span id="tipo-cancha"></span>
+
+      <div class="fila-fecha">
+        <div class="campo">
+          <label for="fecha">Elegí la fecha</label>
+          <input type="date" id="fecha">
+        </div>
+      </div>
+      <p class="texto-fecha" id="texto-fecha"></p>
+    </section>
+
+    <!-- grilla de horarios (la arma disponibilidad.js) -->
+    <section class="tarjeta">
+      <h2>Horarios</h2>
+      <div class="leyenda">
+        <span class="l-libre">Libre</span>
+        <span class="l-ocupado">Ocupado</span>
+        <span class="l-pasado">Pasado</span>
+      </div>
+      <p class="resumen" id="resumen"></p>
+      <div class="horarios" id="horarios"></div>
+    </section>
+
+    <!-- este panel aparece cuando el jugador toca un turno libre -->
+    <section class="tarjeta confirmar oculto" id="panel-confirmar">
+      <h2>Confirmar reserva</h2>
+      <dl class="detalle" id="detalle"></dl>
+
+      <div id="mensaje-reserva" class="mensaje"></div>
+      <div class="alternativas" id="alternativas"></div>
+
+      <div class="acciones">
+        <button type="button" class="btn" id="btn-confirmar">Confirmar reserva</button>
+        <button type="button" class="btn btn-sec" id="btn-cancelar">Cancelar</button>
+      </div>
+    </section>
+  </main>
+
+  <footer id="pie" class="pie"></footer>
+
+  <script src="js/utils.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/canchas.js"></script>
+  <script src="js/reservas.js"></script>
+  <script src="js/pantallas/disponibilidad.js"></script>
+</body>
+</html>

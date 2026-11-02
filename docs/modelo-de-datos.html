@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modelo de datos - PadelYa</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="estilos-docs.css">
+</head>
+<body>
+  <main class="contenedor doc">
+    <a class="volver" href="index.html">&larr; Documentación</a>
+    <section class="tarjeta">
+      <h1>Modelo de datos y entorno de desarrollo</h1>
+      <p>Cuatro tablas. En el prototipo cada tabla es una lista guardada en <code>localStorage</code> (todo el acceso está en <code>js/datos.js</code>), con los mismos campos que tendría una base de datos.</p>
+      <div class="tabla"><table>
+        <tr><th>Tabla</th><th>Campos</th><th>Restricciones</th><th>Clave en el navegador</th></tr>
+        <tr><td><b>usuarios</b></td><td>id, nombre, email, password, rol</td><td>PK id. email único. rol = jugador o admin.</td><td><code>padelya_usuarios</code></td></tr>
+        <tr><td><b>canchas</b></td><td>id, nombre, tipo, activa</td><td>PK id. tipo = Techada o Descubierta. Solo las activas se pueden reservar.</td><td><code>padelya_canchas</code></td></tr>
+        <tr><td><b>reservas</b></td><td>id, usuarioId, canchaId, fecha, horaInicio, estado</td><td>PK id. FK usuarioId y canchaId. estado = confirmada o cancelada. <b>Única: (canchaId, fecha, horaInicio) entre las confirmadas.</b></td><td><code>padelya_reservas</code></td></tr>
+        <tr><td><b>bloqueos</b> (Sprint 2)</td><td>id, canchaId, fecha, horaInicio, horaFin, motivo</td><td>PK id. FK canchaId.</td><td>todavía no se usa</td></tr>
+      </table></div>
+      <p>La sesión no es una tabla: el id del usuario logueado va en <code>sessionStorage</code> (<code>padelya_sesion</code>), por eso se borra al cerrar la pestaña y se pueden probar dos jugadores en dos pestañas.</p>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Relaciones</h2>
+      <ul>
+        <li>Un <b>usuario</b> tiene 0 o más <b>reservas</b>; cada reserva pertenece a un usuario.</li>
+        <li>Una <b>cancha</b> tiene 0 o más <b>reservas</b> y 0 o más <b>bloqueos</b>.</li>
+        <li>Una hora de inicio (8 a 22) dura 1 hora; el último turno empieza a las 22:00.</li>
+      </ul>
+      <h3>Equivalente en SQL (para cuando haya base de datos)</h3>
+<pre><code>CREATE TABLE usuarios (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre    TEXT NOT NULL,
+  email     TEXT NOT NULL UNIQUE,
+  password  TEXT NOT NULL,           -- en serio, guardar el hash
+  rol       TEXT NOT NULL DEFAULT 'jugador' CHECK (rol IN ('jugador','admin'))
+);
+
+CREATE TABLE canchas (
+  id      INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre  TEXT NOT NULL,
+  tipo    TEXT NOT NULL CHECK (tipo IN ('Techada','Descubierta')),
+  activa  INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE reservas (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  usuario_id  INTEGER NOT NULL REFERENCES usuarios(id),
+  cancha_id   INTEGER NOT NULL REFERENCES canchas(id),
+  fecha       TEXT NOT NULL,         -- AAAA-MM-DD
+  hora_inicio INTEGER NOT NULL CHECK (hora_inicio BETWEEN 8 AND 22),
+  estado      TEXT NOT NULL DEFAULT 'confirmada' CHECK (estado IN ('confirmada','cancelada'))
+);
+
+-- regla anti duplicados (PB-06): un solo turno confirmado por cancha, fecha y hora
+CREATE UNIQUE INDEX turno_unico ON reservas (cancha_id, fecha, hora_inicio)
+  WHERE estado = 'confirmada';
+
+CREATE TABLE bloqueos (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  cancha_id   INTEGER NOT NULL REFERENCES canchas(id),
+  fecha       TEXT NOT NULL,
+  hora_inicio INTEGER NOT NULL,
+  hora_fin    INTEGER NOT NULL,
+  motivo      TEXT
+);</code></pre>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Entorno de desarrollo</h2>
+      <div class="tabla"><table>
+        <tr><th>Herramienta</th><th>Para qué</th></tr>
+        <tr><td>HTML, CSS y JavaScript</td><td>Todo el prototipo. Sin frameworks ni librerías.</td></tr>
+        <tr><td>Visual Studio Code</td><td>Editor. Se recomienda la extensión Live Server (opcional).</td></tr>
+        <tr><td>Navegador (Chrome o Edge)</td><td>Ejecutar y depurar con las herramientas del desarrollador (F12).</td></tr>
+        <tr><td>Git y GitHub</td><td>Control de versiones y trabajo en equipo (ver <a href="flujo-github.html">flujo de ramas</a>).</td></tr>
+      </table></div>
+      <h3>Cómo levantarlo</h3>
+      <ol>
+        <li>Clonar el repositorio (o descomprimir el zip).</li>
+        <li>Abrir <code>index.html</code> con doble clic. No necesita servidor.</li>
+        <li>Entrar con <code>jugador@padelya.com</code> / <code>123456</code> o crear una cuenta nueva.</li>
+        <li>Para volver a los datos de prueba: "Reiniciar datos de prueba" en el pie de cualquier pantalla.</li>
+      </ol>
+      <p class="nota">La contraseña se guarda en texto plano solo porque es un prototipo sin servidor. En un sistema real se guarda un hash calculado en el servidor.</p>
+    </section>
+  </main>
+</body>
+</html>
