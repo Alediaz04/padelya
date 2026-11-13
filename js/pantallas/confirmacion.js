@@ -1,5 +1,5 @@
 // pantalla de reserva confirmada (reserva-confirmada.html) - PB-05
-// muestra los datos de la reserva que se acaba de hacer
+// muestra los datos de la reserva que se acaba de hacer (incluyendo cantidad de turnos y precio total)
 
 const usuario = protegerPagina();
 
@@ -11,15 +11,24 @@ if (usuario !== null) {
     window.location.href = 'canchas.html';
   } else {
     const cancha = buscarCancha(reserva.canchaId);
+    const cantTurnos = obtenerCantidadTurnos(reserva);
+    const horaFin = obtenerHoraFin(reserva);
+    const precioTotal = obtenerPrecioReserva(reserva, cancha);
 
     const detalle = document.getElementById('detalle-reserva');
     agregarDato(detalle, 'Cancha', cancha.nombre + ' (' + cancha.tipo + ')');
     agregarDato(detalle, 'Fecha', formatearFecha(reserva.fecha));
-    agregarDato(detalle, 'Horario', formatearHora(reserva.horaInicio) + ' a ' + formatearHora(reserva.horaInicio + 1));
-    agregarDato(detalle, 'Jugador', usuario.nombre);
+    agregarDato(detalle, 'Horario', formatearHora(reserva.horaInicio) + ' a ' + formatearHora(horaFin) + ' hs');
+    agregarDato(
+      detalle,
+      'Duración',
+      cantTurnos === 1 ? '1 turno (60 min)' : cantTurnos + ' turnos consecutivos (' + cantTurnos + ' hs)'
+    );
+    agregarDato(detalle, 'Total a pagar', formatearPrecio(precioTotal));
+    agregarDato(detalle, 'Jugador', usuario.nombre + (usuario.telefono ? ' · Tel: ' + usuario.telefono : ''));
     agregarDato(detalle, 'N° de reserva', '#' + reserva.id);
 
-    // este link vuelve a la misma cancha y fecha: ahí se ve que el turno ya figura como ocupado
+    // este link vuelve a la misma cancha y fecha: ahí se ve que los turnos ya figuran como ocupados
     document.getElementById('link-disponibilidad').href =
       'disponibilidad.html?cancha=' + cancha.id + '&fecha=' + reserva.fecha;
 

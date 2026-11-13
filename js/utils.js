@@ -35,6 +35,21 @@ function formatearHora(hora) {
   return String(hora).padStart(2, '0') + ':00';
 }
 
+// 25000 -> "$25.000"
+function formatearPrecio(monto) {
+  return '$' + Number(monto).toLocaleString('es-AR');
+}
+
+// ---------- seguridad: hashing criptográfico (SHA-256) ----------
+// Encripta la contraseña para que nunca se guarde ni se vea en texto plano en Firestore
+async function hashearPassword(password) {
+  const enc = new TextEncoder();
+  const data = enc.encode('padelya_salt_' + password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 // ---------- html ----------
 
 // crea un elemento con clase y texto. Usamos textContent para que si alguien
@@ -86,11 +101,21 @@ function armarBarra() {
   const links = crear('nav', 'barra-links');
   const usuario = usuarioActual(); // esta función está en auth.js
 
+  const paginaActual = window.location.pathname.split('/').pop();
+
   if (usuario !== null) {
     links.appendChild(crear('span', 'saludo', 'Hola, ' + usuario.nombre));
-    const enlaceCanchas = crear('a', '', 'Canchas');
+    if (usuario.rol === 'admin') {
+      const enlaceAdmin = crear('a', paginaActual === 'admin.html' ? 'activo' : '', '⚙️ Panel Admin');
+      enlaceAdmin.href = 'admin.html';
+      links.appendChild(enlaceAdmin);
+    }
+    const enlaceCanchas = crear('a', paginaActual === 'canchas.html' || paginaActual === 'disponibilidad.html' ? 'activo' : '', 'Canchas');
     enlaceCanchas.href = 'canchas.html';
     links.appendChild(enlaceCanchas);
+    const enlaceMisReservas = crear('a', paginaActual === 'mis-reservas.html' ? 'activo' : '', 'Mis reservas');
+    enlaceMisReservas.href = 'mis-reservas.html';
+    links.appendChild(enlaceMisReservas);
     const botonSalir = crear('button', 'btn-salir', 'Cerrar sesión');
     botonSalir.addEventListener('click', cerrarSesion);
     links.appendChild(botonSalir);
@@ -109,20 +134,99 @@ function armarPie() {
   const pie = document.getElementById('pie');
   if (pie === null) return;
   pie.innerHTML = '';
-  pie.appendChild(document.createTextNode('PadelYa - Sprint 1 - prototipo para la materia  |  '));
 
-  // sirve para volver a los datos de prueba (las reservas de prueba se generan para "mañana")
-  const reiniciar = crear('a', '', 'Reiniciar datos de prueba');
-  reiniciar.href = '#';
-  reiniciar.addEventListener('click', function (evento) {
-    evento.preventDefault();
-    reiniciarDatos(); // esta función está en datos.js
-    window.location.href = 'index.html';
+  const contenedor = crear('div', 'pie-contenido');
+
+  // BANDA SUPERIOR DE DESTACADOS (colorida estilo ATC Sports)
+  const franja = crear('div', 'pie-franja');
+  const itemsFranja = [
+    { icono: '⚡', titulo: 'Reserva instantánea', desc: 'Turnos confirmados en tiempo real sin señas complicadas' },
+    { icono: '🏟️', titulo: 'Canchas profesionales', desc: 'Techadas ($25.000) y Descubiertas ($20.000) con Blindex' },
+    { icono: '⏱️', titulo: 'Hasta 4 turnos seguidos', desc: 'Armá partidos de 1, 2, 3 o 4 horas consecutivas en el día' },
+    { icono: '🔄', titulo: 'Cancelación flexible', desc: 'Si no podés asistir, cancelás desde Mis Reservas en un clic' }
+  ];
+  itemsFranja.forEach(function (item) {
+    const tarjetaFranja = crear('div', 'pie-destacado');
+    tarjetaFranja.appendChild(crear('span', 'pie-icono', item.icono));
+    const textoFranja = crear('div');
+    textoFranja.appendChild(crear('strong', '', item.titulo));
+    textoFranja.appendChild(crear('p', '', item.desc));
+    tarjetaFranja.appendChild(textoFranja);
+    franja.appendChild(tarjetaFranja);
   });
-  pie.appendChild(reiniciar);
+  contenedor.appendChild(franja);
 
-  pie.appendChild(document.createTextNode('  |  '));
-  const documentacion = crear('a', '', 'Documentación');
-  documentacion.href = 'docs/index.html';
-  pie.appendChild(documentacion);
+  // GRILLA DE COLUMNAS CON DATOS DE LA PÁGINA / COMPLEJO
+  const columnas = crear('div', 'pie-columnas');
+
+  // Columna 1: Marca
+  const colMarca = crear('div', 'pie-col');
+  const logoPie = crear('a', 'logo', 'Padel');
+  logoPie.href = 'index.html';
+  logoPie.appendChild(crear('span', '', 'Ya'));
+  colMarca.appendChild(logoPie);
+  colMarca.appendChild(
+    crear('p', 'pie-texto', 'Tu complejo de pádel en Mendoza. Mirá la disponibilidad en vivo, elegí tu cancha favorita y asegurá tu partido sin llamadas.')
+  );
+  const chips = crear('div', 'club-chips');
+  chips.appendChild(crear('span', 'club-chip', 'Abierto 08:00 a 23:00'));
+  chips.appendChild(crear('span', 'club-chip', 'Césped Sintético'));
+  colMarca.appendChild(chips);
+  columnas.appendChild(colMarca);
+
+  // Columna 2: Datos del Complejo
+  const colClub = crear('div', 'pie-col');
+  colClub.appendChild(crear('h4', '', 'PadelYa Center'));
+  const listaClub = crear('ul', 'pie-lista');
+  listaClub.appendChild(crear('li', '', '📍 Av. Acceso Sur y Malabia, Mendoza'));
+  listaClub.appendChild(crear('li', '', '🕒 Lunes a Domingo: 08:00 a 23:00 hs'));
+  listaClub.appendChild(crear('li', '', '🎾 Techada: $25.000 / turno (60 min)'));
+  listaClub.appendChild(crear('li', '', '☀️ Descubierta: $20.000 / turno (60 min)'));
+  listaClub.appendChild(crear('li', '', '🚗 Estacionamiento, Buffet y Vestuarios'));
+  colClub.appendChild(listaClub);
+  columnas.appendChild(colClub);
+
+  // Columna 3: Accesos Rápidos
+  const colLinks = crear('div', 'pie-col');
+  colLinks.appendChild(crear('h4', '', 'Jugadores'));
+  const listaLinks = crear('ul', 'pie-lista');
+  const accesos = [
+    { texto: 'Inicio', href: 'index.html' },
+    { texto: 'Ver canchas y precios', href: 'canchas.html' },
+    { texto: 'Mis reservas y cancelaciones', href: 'mis-reservas.html' },
+    { texto: 'Iniciar sesión', href: 'login.html' },
+    { texto: 'Crear cuenta', href: 'registro.html' }
+  ];
+  accesos.forEach(function (item) {
+    const li = crear('li');
+    const a = crear('a', '', item.texto);
+    a.href = item.href;
+    li.appendChild(a);
+    listaLinks.appendChild(li);
+  });
+  colLinks.appendChild(listaLinks);
+  columnas.appendChild(colLinks);
+
+  // Columna 4: Contacto y Atención
+  const colContacto = crear('div', 'pie-col');
+  colContacto.appendChild(crear('h4', '', 'Contacto & Atención'));
+  colContacto.appendChild(
+    crear('p', 'pie-texto', '¿Tenés dudas sobre turnos fijos, torneos o eventos corporativos? Comunicate con nuestro equipo.')
+  );
+  const listaContacto = crear('ul', 'pie-lista');
+  listaContacto.appendChild(crear('li', '', '💬 WhatsApp: +54 9 261 555-PADEL'));
+  listaContacto.appendChild(crear('li', '', '✉️ info@padelya.com'));
+  listaContacto.appendChild(crear('li', '', '🛡️ Sistema con seguridad SSL y Firestore'));
+  colContacto.appendChild(listaContacto);
+  columnas.appendChild(colContacto);
+
+  contenedor.appendChild(columnas);
+
+  // BARRA INFERIOR
+  const barraInf = crear('div', 'pie-inferior');
+  barraInf.appendChild(crear('span', '', '© 2026 PadelYa Center · Todos los derechos reservados'));
+  barraInf.appendChild(crear('span', 'pie-badge-sprint', 'Plataforma Oficial'));
+  contenedor.appendChild(barraInf);
+
+  pie.appendChild(contenedor);
 }

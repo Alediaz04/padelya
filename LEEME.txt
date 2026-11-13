@@ -1,31 +1,29 @@
-PadelYa - Prototipo Sprint 1
-============================
+PadelYa - Prototipo Funcional Sprint 1 + Sprint 2
+=================================================
 
-Como abrirlo: descomprimir la carpeta y abrir index.html con doble click (no necesita servidor).
+Como abrirlo: abrir index.html o login.html en el navegador.
+
+Credenciales de acceso
+  - Jugador:        jugador@padelya.com / 123456
+  - Administrador:  admin@padelya.com   / admin123  (redirige directo a admin.html)
 
 Pantallas
   index.html               inicio
-  registro.html            PB-01 registrarse
-  login.html               PB-02 iniciar sesion
-  canchas.html             PB-03 listado de canchas activas
-  disponibilidad.html      PB-04 disponibilidad por fecha + PB-05 reservar + PB-06 sin duplicados
-  reserva-confirmada.html  resumen de la reserva
-  docs/index.html            documentación del sprint:
-    docs/casos-de-uso.html     casos de uso del jugador y del administrador (ITU-20)
-    docs/diagrama-clases.html  diagrama de clases (Usuario, Cancha, Reserva, Bloqueo) (ITU-21)
-    docs/modelo-de-datos.html  tablas, restricciones, SQL equivalente y entorno (ITU-22)
-    docs/flujo-github.html     ramas, commits y Pull Requests (ITU-19)
+  registro.html            registrarse como jugador
+  login.html               iniciar sesion (jugador o administrador)
+  canchas.html             listado de canchas activas con precios ($25.000 Techada / $20.000 Descubierta)
+  disponibilidad.html      disponibilidad por fecha + reservar (1 a 4 turnos consecutivos) + sin duplicados
+  reserva-confirmada.html  resumen de la reserva confirmada
+  mis-reservas.html        ver mis reservas + cancelar reserva si no puedo asistir
+  admin.html               Panel Administrador:
+                             - ver y gestionar todas las reservas del dia + metricas + alta manual
+                             - configurar dias cerrados, feriados, domingos de medio tiempo y bloqueos por mantenimiento/torneos
+                             - crear, editar, activar/desactivar y eliminar canchas
 
 Archivos JS
-  js/utils.js    fechas, mensajes, barra de arriba
-  js/datos.js    guarda y lee todo (localStorage). Es lo unico que habria que cambiar si usamos una base de datos
-  js/auth.js     registro, login, logout, control de sesion
-  js/canchas.js  funciones de canchas
-  js/reservas.js turnos, disponibilidad y reservas
-  js/pantallas/  un archivo por pantalla (solo conecta el html con las funciones de arriba)
-
-Para probarlo
-  - Usuario de prueba: jugador@padelya.com / 123456 (o registrar uno nuevo)
-  - Reservas duplicadas: abrir el sitio en 2 pestanas, loguearse con usuarios distintos, elegir el mismo turno
-    en las dos y confirmar en la primera y despues en la segunda. La segunda avisa y ofrece otros horarios.
-  - "Reiniciar datos de prueba" (abajo de todo) vuelve todo al estado inicial.
+  js/utils.js    fechas, formato de precios, mensajes, barra superior y pie de pagina
+  js/datos.js    guarda y lee todo (localStorage). Es el unico archivo que cambiara al conectar la base de datos
+  js/auth.js     registro, login, logout, control de sesion y proteccion por rol (jugador / admin)
+  js/canchas.js  funciones de canchas, precios y CRUD de administrador
+  js/reservas.js turnos, disponibilidad, reservas de 1 a 4 turnos, cancelaciones y bloqueos/feriados
+  js/pantallas/  un archivo por pantalla

@@ -12,35 +12,57 @@
   <main class="contenedor">
     <a class="volver" href="canchas.html">&larr; Volver a las canchas</a>
 
-    <!-- datos de la cancha y selector de fecha -->
+    <!-- datos de la cancha y carrusel de fechas estilo ATC Sports -->
     <section class="tarjeta">
-      <h1 id="nombre-cancha"></h1>
-      <span id="tipo-cancha"></span>
+      <div class="cancha-header-disp">
+        <div>
+          <h1 id="nombre-cancha"></h1>
+          <p class="subtitulo" id="subtitulo-cancha" style="margin:4px 0 0"></p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span id="tipo-cancha"></span>
+          <span id="precio-cancha" class="precio-tag-reserva"></span>
+        </div>
+      </div>
+
+      <!-- tira rápida de próximos 7 días (estilo ATC Sports) -->
+      <div class="dias-strip" id="dias-rapidos"></div>
 
       <div class="fila-fecha">
+        <p class="texto-fecha" id="texto-fecha"></p>
         <div class="campo">
-          <label for="fecha">Elegí la fecha</label>
+          <label for="fecha">Otra fecha:</label>
           <input type="date" id="fecha">
         </div>
       </div>
-      <p class="texto-fecha" id="texto-fecha"></p>
     </section>
 
     <!-- grilla de horarios (la arma disponibilidad.js) -->
     <section class="tarjeta">
-      <h2>Horarios</h2>
+      <h2>Seleccioná tu horario</h2>
+      <div class="aviso-turnos">
+        💡 Podés elegir <strong>1, 2, 3 o hasta 4 turnos consecutivos</strong> en el mismo día tocando horarios seguidos o eligiendo la duración abajo. Para jugar en otro horario separado o en otro día, realizá una reserva aparte.
+      </div>
+      <div id="aviso-apertura" class="mensaje"></div>
       <div class="leyenda">
-        <span class="l-libre">Libre</span>
-        <span class="l-ocupado">Ocupado</span>
-        <span class="l-pasado">Pasado</span>
+        <span class="l-libre">Disponible</span>
+        <span class="l-ocupado">Reservado</span>
+        <span class="l-bloqueado">Cerrado / Horario reducido / Mantenimiento</span>
+        <span class="l-pasado">Finalizado</span>
       </div>
       <p class="resumen" id="resumen"></p>
       <div class="horarios" id="horarios"></div>
     </section>
 
-    <!-- este panel aparece cuando el jugador toca un turno libre -->
+    <!-- este panel aparece cuando el jugador toca uno o hasta 4 turnos libres consecutivos -->
     <section class="tarjeta confirmar oculto" id="panel-confirmar">
-      <h2>Confirmar reserva</h2>
+      <h2>Confirmar tu reserva</h2>
+
+      <div class="selector-duracion">
+        <span class="selector-duracion-label">Cantidad de turnos consecutivos (desde el horario de inicio elegido):</span>
+        <div class="selector-duracion-botones" id="botones-duracion"></div>
+      </div>
+
       <dl class="detalle" id="detalle"></dl>
 
       <div id="mensaje-reserva" class="mensaje"></div>
@@ -48,12 +70,17 @@
 
       <div class="acciones">
         <button type="button" class="btn" id="btn-confirmar">Confirmar reserva</button>
-        <button type="button" class="btn btn-sec" id="btn-cancelar">Cancelar</button>
+        <button type="button" class="btn btn-sec" id="btn-cancelar">Cancelar selección</button>
       </div>
     </section>
   </main>
 
   <footer id="pie" class="pie"></footer>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
 
   <script src="js/utils.js"></script>
   <script src="js/datos.js"></script>

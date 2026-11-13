@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel Administrador - PadelYa</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+
+<body>
+  <header id="barra" class="barra"></header>
+
+  <main class="contenedor">
+    <!-- Cabecera del Panel Administrador -->
+    <section class="club-banner">
+      <div class="club-info">
+        <span class="club-badge-top">Panel de Control · Perfil Administrador</span>
+        <h1>Administración PadelYa Center</h1>
+        <div class="club-meta">
+          <span>📅 Gestión de reservas</span>
+        </div>
+      </div>
+      <div class="club-chips">
+        <a href="canchas.html" class="btn btn-chico">Ver vista de jugador →</a>
+      </div>
+    </section>
+
+    <div id="mensaje-admin" class="mensaje"></div>
+
+    <!-- Pestañas de navegación del administrador -->
+    <nav class="admin-tabs">
+      <button type="button" class="admin-tab activo" data-tab="tab-reservas">📅 Reservas del Día</button>
+      <button type="button" class="admin-tab" data-tab="tab-horarios">🚫 Feriados, Horario Reducido y Bloqueos</button>
+      <button type="button" class="admin-tab" data-tab="tab-canchas">🏟️ Gestión de Canchas</button>
+    </nav>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 1: RESERVAS DEL DÍA Y GESTIÓN DE TURNOS                     -->
+    <!-- =================================================================== -->
+    <section id="tab-reservas" class="seccion-admin">
+      <div class="tarjeta">
+        <div class="cabecera-seccion">
+          <div>
+            <h2>Reservas por fecha</h2>
+            <p class="subtitulo" id="texto-fecha-admin" style="margin:0"></p>
+          </div>
+          <div class="acciones">
+            <button type="button" class="btn btn-sec btn-chico" id="btn-ayer-admin">&larr; Día anterior</button>
+            <button type="button" class="btn btn-sec btn-chico" id="btn-hoy-admin">Hoy</button>
+            <button type="button" class="btn btn-sec btn-chico" id="btn-manana-admin">Día siguiente &rarr;</button>
+          </div>
+        </div>
+
+        <div class="filtros-admin">
+          <div class="campo">
+            <label for="filtro-fecha">Fecha a consultar</label>
+            <input type="date" id="filtro-fecha">
+          </div>
+          <div class="campo">
+            <label for="filtro-cancha">Cancha</label>
+            <select id="filtro-cancha"></select>
+          </div>
+          <div class="campo">
+            <label for="filtro-estado">Estado</label>
+            <select id="filtro-estado">
+              <option value="todas">Todas las reservas</option>
+              <option value="confirmada">Solo confirmadas</option>
+              <option value="cancelada">Solo canceladas</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPIs del día -->
+        <div class="admin-kpis">
+          <div class="kpi-card">
+            <span>Reservas confirmadas</span>
+            <strong id="kpi-confirmadas">0</strong>
+          </div>
+          <div class="kpi-card">
+            <span>Turnos ocupados (horas)</span>
+            <strong id="kpi-horas">0 hs</strong>
+          </div>
+          <div class="kpi-card">
+            <span>Recaudación estimada</span>
+            <strong id="kpi-recaudacion">$0</strong>
+          </div>
+        </div>
+
+        <div class="tabla-admin-wrap" id="contenedor-tabla-reservas"></div>
+      </div>
+
+      <!-- Cargar reserva manual (mostrador / teléfono) -->
+      <div class="tarjeta">
+        <h2>Registrar reserva manual (Mostrador / Teléfono)</h2>
+        <p class="subtitulo">Permite asignar de 1 a 4 turnos consecutivos en la fecha seleccionada arriba.</p>
+        <form id="form-reserva-admin">
+          <div class="grilla-form-admin">
+            <div class="campo">
+              <label for="admin-res-cancha">Cancha</label>
+              <select id="admin-res-cancha" required></select>
+            </div>
+            <div class="campo">
+              <label for="admin-res-hora">Hora de inicio</label>
+              <select id="admin-res-hora" required></select>
+            </div>
+            <div class="campo">
+              <label for="admin-res-turnos">Turnos consecutivos</label>
+              <select id="admin-res-turnos">
+                <option value="1">1 turno (1 hora)</option>
+                <option value="2">2 turnos (2 horas)</option>
+                <option value="3">3 turnos (3 horas)</option>
+                <option value="4">4 turnos (4 horas)</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="admin-res-usuario">Jugador</label>
+              <select id="admin-res-usuario"></select>
+            </div>
+            <div class="campo">
+              <button type="submit" class="btn">Cargar reserva</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 2: FERIADOS, DOMINGOS MEDIO TIEMPO Y BLOQUEOS               -->
+    <!-- =================================================================== -->
+    <section id="tab-horarios" class="seccion-admin oculto">
+      <!-- Configuración semanal: Domingos medio tiempo o cerrados, etc. -->
+      <div class="tarjeta">
+        <h2>Horario habitual por día de la semana (Domingos, medio tiempo o días cerrados)</h2>
+        <p class="subtitulo">Configurá qué días abre el complejo en horario completo, qué días abre medio tiempo (por
+          ejemplo domingos de 09:00 a 14:00) o qué días permanece cerrado.</p>
+        <div id="lista-dias-semana"></div>
+        <div class="acciones" style="margin-top:16px">
+          <button type="button" class="btn" id="btn-guardar-semana">Guardar horarios semanales</button>
+          <button type="button" class="btn btn-sec" id="btn-restaurar-semana">Restaurar por defecto (Domingos 09 a 14
+            hs)</button>
+        </div>
+      </div>
+
+      <!-- Bloqueos por fecha: Feriado cerrado, Feriado medio tiempo, Mantenimiento o Torneo -->
+      <div class="tarjeta">
+        <h2>Bloquear fecha, feriado, horario reducido o mantenimiento</h2>
+        <p class="subtitulo">Aplicá un cierre total por feriado, un horario reducido para una fecha puntual o un bloqueo
+          por torneo/mantenimiento.</p>
+
+        <form id="form-bloqueo">
+          <div class="grilla-form-admin" style="margin-bottom:14px">
+            <div class="campo">
+              <label for="bloq-cancha">Alcance (Cancha)</label>
+              <select id="bloq-cancha"></select>
+            </div>
+            <div class="campo">
+              <label for="bloq-fecha">Fecha</label>
+              <input type="date" id="bloq-fecha" required>
+            </div>
+            <div class="campo">
+              <label for="bloq-modo">Tipo de restricción</label>
+              <select id="bloq-modo">
+                <option value="cerrado">🔴 Día cerrado completo (No se trabaja / Feriado)</option>
+                <option value="reducido">🟡 Horario reducido / Medio tiempo en esa fecha</option>
+                <option value="franja">🔧 Bloquear franja horaria puntual (Mantenimiento / Torneo)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- campos dinámicos según el modo elegido -->
+          <div id="caja-horas-reducido" class="grilla-form-admin oculto" style="margin-bottom:14px">
+            <div class="campo">
+              <label for="bloq-abre">Ese día ABRE a las:</label>
+              <select id="bloq-abre"></select>
+            </div>
+            <div class="campo">
+              <label for="bloq-cierra">Y CIERRA a las:</label>
+              <select id="bloq-cierra"></select>
+            </div>
+          </div>
+
+          <div id="caja-horas-franja" class="grilla-form-admin oculto" style="margin-bottom:14px">
+            <div class="campo">
+              <label for="bloq-inicio">Bloquear desde las:</label>
+              <select id="bloq-inicio"></select>
+            </div>
+            <div class="campo">
+              <label for="bloq-fin">Hasta las:</label>
+              <select id="bloq-fin"></select>
+            </div>
+          </div>
+
+          <div class="grilla-form-admin">
+            <div class="campo">
+              <label for="bloq-motivo">Motivo (visible en la grilla)</label>
+              <input type="text" id="bloq-motivo" placeholder="Ej: Feriado Nacional, Torneo Americano, Mantenimiento..."
+                required>
+            </div>
+            <div class="campo" style="flex-direction:row;align-items:center;gap:8px;padding-bottom:10px">
+              <input type="checkbox" id="bloq-cancelar-reservas" checked style="width:18px;height:18px">
+              <label for="bloq-cancelar-reservas" style="margin:0;cursor:pointer">Cancelar reservas existentes que
+                caigan en el horario cerrado</label>
+            </div>
+            <div class="campo">
+              <button type="submit" class="btn">Aplicar configuración / bloqueo</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Listado de bloqueos y feriados activos -->
+      <div class="tarjeta">
+        <h2>Feriados, horarios reducidos y bloqueos cargados</h2>
+        <div id="lista-bloqueos-admin"></div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PESTAÑA 3: GESTIÓN DE CANCHAS — CREAR, EDITAR, ELIMINAR             -->
+    <!-- =================================================================== -->
+    <section id="tab-canchas" class="seccion-admin oculto">
+      <div class="tarjeta">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+          <h2 id="titulo-form-cancha" style="margin:0">Crear o agregar nueva cancha</h2>
+          <button type="button" class="btn btn-sec btn-chico" id="btn-mostrar-agregar-tipo">➕ Agregar otro tipo de cancha</button>
+        </div>
+
+        <form id="form-cancha">
+          <input type="hidden" id="cancha-edit-id" value="">
+          <div class="grilla-form-admin">
+            <div class="campo">
+              <label for="cancha-nombre">Nombre de la cancha</label>
+              <input type="text" id="cancha-nombre" placeholder="Ej: Cancha 5" required>
+            </div>
+            <div class="campo">
+              <label for="cancha-tipo">Tipo de Cancha</label>
+              <select id="cancha-tipo">
+                <option value="Techada">Techada</option>
+                <option value="Descubierta">Descubierta</option>
+                <option value="Panorámica Indoor">Panorámica Indoor</option>
+                <option value="Single (1 vs 1)">Single (1 vs 1)</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="cancha-precio">Precio por turno (60 min)</label>
+              <input type="number" id="cancha-precio" min="1000" step="500" value="25000" required>
+            </div>
+            <div class="campo">
+              <label for="cancha-caracteristicas">Características / Descripción</label>
+              <input type="text" id="cancha-caracteristicas" placeholder="Ej: Blindex 12mm · Césped sintético · LED">
+            </div>
+            <div class="campo">
+              <label for="cancha-activa">Estado inicial</label>
+              <select id="cancha-activa">
+                <option value="true">Activa (visible para reservar)</option>
+                <option value="false">Inactiva (en mantenimiento / oculta)</option>
+              </select>
+            </div>
+            <div class="acciones">
+              <button type="submit" class="btn" id="btn-guardar-cancha">Guardar cancha</button>
+              <button type="button" class="btn btn-sec oculto" id="btn-cancelar-edicion">Cancelar edición</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Canchas del complejo</h2>
+        <p class="subtitulo">Podés editar el nombre, tipo o valor por turno, pausar una cancha o eliminarla.</p>
+        <div class="grilla-canchas" id="grilla-canchas-admin"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="pie" class="pie"></footer>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <script src="js/utils.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/canchas.js"></script>
+  <script src="js/reservas.js"></script>
+  <script src="js/pantallas/admin.js"></script>
+</body>
+
+</html>

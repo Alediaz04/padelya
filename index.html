@@ -12,8 +12,9 @@
   <main class="contenedor">
     <!-- parte de arriba con el mensaje principal -->
     <section class="hero">
+      <span class="club-badge-top">PadelYa Center · Turnos en tiempo real</span>
       <h1>Reservá tu cancha de pádel en menos de un minuto</h1>
-      <p>Mirá los horarios libres, elegí tu turno y listo. Sin vueltas y sin turnos superpuestos.</p>
+      <p>Elegí día y horario en nuestras canchas de blindex y césped sintético. Confirmación instantánea y sin turnos superpuestos.</p>
       <div class="botones" id="botones-inicio">
         <a class="btn" href="registro.html">Crear mi cuenta</a>
         <a class="btn btn-sec" href="login.html">Ya tengo cuenta</a>
@@ -24,23 +25,28 @@
     <section class="pasos">
       <div class="paso">
         <div class="numero">1</div>
-        <h3>Registrate</h3>
-        <p>Creá tu cuenta con nombre, email y contraseña.</p>
+        <h3>Ingresá a tu cuenta</h3>
+        <p>Registrate en segundos con tu nombre, email y contraseña.</p>
       </div>
       <div class="paso">
         <div class="numero">2</div>
-        <h3>Elegí cancha y fecha</h3>
-        <p>Mirá qué horarios están libres y cuáles ocupados.</p>
+        <h3>Elegí cancha y horario</h3>
+        <p>Explorá la disponibilidad por día en canchas techadas o descubiertas.</p>
       </div>
       <div class="paso">
         <div class="numero">3</div>
-        <h3>Reservá tu turno</h3>
-        <p>Confirmás y el horario queda a tu nombre.</p>
+        <h3>Jugá sin vueltas</h3>
+        <p>Confirmás tu turno de 60 minutos y lo gestionás desde Mis Reservas.</p>
       </div>
     </section>
   </main>
 
   <footer id="pie" class="pie"></footer>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
 
   <script src="js/utils.js"></script>
   <script src="js/datos.js"></script>

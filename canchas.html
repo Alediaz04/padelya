@@ -10,14 +10,41 @@
   <header id="barra" class="barra"></header>
 
   <main class="contenedor">
-    <h1 class="titulo-pagina">Elegí dónde jugar</h1>
-    <p class="subtitulo" id="cantidad"></p>
+    <!-- Banner del club inspirado en ATC Sports (Indoor Padel Center) -->
+    <section class="club-banner">
+      <div class="club-info">
+        <span class="club-badge-top">Complejo Oficial · Reserva Online</span>
+        <h1>PadelYa Center</h1>
+        <div class="club-meta">
+          <span>📍 Av. Acceso Sur y Malabia</span>
+          <span>🕒 Todos los días de 08:00 a 23:00 hs</span>
+        </div>
+      </div>
+      <div class="club-chips">
+        <span class="club-chip">Pádel Blindex</span>
+        <span class="club-chip">Césped Sintético</span>
+        <span class="club-chip">Estacionamiento</span>
+        <span class="club-chip">Buffet &amp; Vestuarios</span>
+      </div>
+    </section>
+
+    <div class="cabecera-seccion">
+      <div>
+        <h2 class="titulo-pagina">Elegí dónde jugar</h2>
+        <p class="subtitulo" id="cantidad" style="margin-bottom:0"></p>
+      </div>
+    </div>
 
     <!-- las tarjetas de las canchas las arma canchas.js -->
     <section class="grilla-canchas" id="lista-canchas"></section>
   </main>
 
   <footer id="pie" class="pie"></footer>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
 
   <script src="js/utils.js"></script>
   <script src="js/datos.js"></script>

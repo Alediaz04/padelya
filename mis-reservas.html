@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis reservas - PadelYa</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <header id="barra" class="barra"></header>
+
+  <main class="contenedor">
+    <h1 class="titulo-pagina">Mis reservas</h1>
+    <p class="subtitulo" id="resumen-reservas"></p>
+
+    <div id="mensaje-reservas" class="mensaje"></div>
+
+    <!-- reservas próximas confirmadas -->
+    <section id="seccion-proximas">
+      <h2 class="seccion-titulo">Próximos turnos</h2>
+      <div class="lista-reservas" id="lista-proximas"></div>
+    </section>
+
+    <!-- reservas pasadas o canceladas -->
+    <section id="seccion-historial" class="oculto">
+      <h2 class="seccion-titulo">Historial</h2>
+      <div class="lista-reservas" id="lista-historial"></div>
+    </section>
+
+    <!-- cuando el jugador no tiene ninguna reserva -->
+    <section class="tarjeta centrada oculto" id="sin-reservas">
+      <h2>Todavía no tenés reservas</h2>
+      <p>Elegí una cancha y un horario libre para reservar tu primer partido.</p>
+      <a class="btn" href="canchas.html">Ver canchas disponibles</a>
+    </section>
+  </main>
+
+  <footer id="pie" class="pie"></footer>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <script src="js/utils.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/canchas.js"></script>
+  <script src="js/reservas.js"></script>
+  <script src="js/pantallas/mis-reservas.js"></script>
+</body>
+</html>
+

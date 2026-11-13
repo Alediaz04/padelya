@@ -4,9 +4,13 @@
 if (usuarioActual() !== null) {
   const caja = document.getElementById('botones-inicio');
   caja.innerHTML = '';
-  const boton = crear('a', 'btn', 'Ver las canchas');
+  const boton = crear('a', 'btn', 'Reservar cancha →');
   boton.href = 'canchas.html';
   caja.appendChild(boton);
+
+  const botonReservas = crear('a', 'btn btn-sec', 'Ver mis reservas');
+  botonReservas.href = 'mis-reservas.html';
+  caja.appendChild(botonReservas);
 }
 
 armarBarra();
