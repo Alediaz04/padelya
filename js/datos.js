@@ -1,6 +1,7 @@
 // datos.js
 // Capa de persistencia conectada a Firebase Cloud Firestore
-// con sincronización transparente a localStorage para rendimiento instantáneo y modo offline.
+// Incluye dataset realista desde Junio en adelante (10+ turnos diarios, mayor demanda en fines de semana,
+// facturación mensual > $10.000.000 y gastos mensuales al 70% incluyendo sueldos de empleados).
 
 const CLAVE_USUARIOS = 'padelya_usuarios';
 const CLAVE_CANCHAS = 'padelya_canchas';
@@ -9,6 +10,9 @@ const CLAVE_BLOQUEOS = 'padelya_bloqueos';
 const CLAVE_GASTOS = 'padelya_gastos';
 const CLAVE_CONFIG_DIAS = 'padelya_config_dias';
 const CLAVE_SESION = 'padelya_sesion';
+const CLAVE_VERSION_SEED = 'padelya_seed_junio_v3';
+const CLAVE_RESERVAS_BORRADAS = 'padelya_reservas_borradas';
+const CLAVE_GASTOS_BORRADOS = 'padelya_gastos_borrados';
 
 // Colecciones en Firestore
 const COL_USUARIOS = 'usuarios';
@@ -67,6 +71,25 @@ function borrarDocFirestore(coleccion, id) {
     });
 }
 
+// Combina una lista base local con los documentos recibidos desde Firestore sin perder el historial desde Junio
+function combinarConBaseLocal(listaLocal, listaRemota, claveBorrados) {
+  const borrados = leerLista(claveBorrados || '');
+  const mapa = {};
+  listaLocal.forEach(function (item) {
+    if (borrados.indexOf(item.id) === -1) {
+      mapa[item.id] = item;
+    }
+  });
+  listaRemota.forEach(function (item) {
+    if (borrados.indexOf(item.id) === -1) {
+      mapa[item.id] = item;
+    }
+  });
+  return Object.keys(mapa)
+    .map(function (k) { return mapa[k]; })
+    .sort(function (a, b) { return a.id - b.id; });
+}
+
 // Carga inicial y escucha en tiempo real desde Firestore
 function iniciarSincronizacionFirestore(alTerminar) {
   if (!firestoreDisponible()) {
@@ -85,16 +108,12 @@ function iniciarSincronizacionFirestore(alTerminar) {
   // 1. Canchas
   db.collection(COL_CANCHAS).onSnapshot(function (snapshot) {
     if (!snapshot.empty) {
-      const lista = [];
-      snapshot.forEach(function (doc) {
-        lista.push(doc.data());
-      });
-      lista.sort(function (a, b) { return a.id - b.id; });
-      guardarLista(CLAVE_CANCHAS, lista);
+      const remota = [];
+      snapshot.forEach(function (doc) { remota.push(doc.data()); });
+      const combinada = combinarConBaseLocal(obtenerCanchas(), remota);
+      guardarLista(CLAVE_CANCHAS, combinada);
     } else {
-      // si Firestore está vacío cargamos las canchas iniciales a Firestore
-      const canchasLocales = obtenerCanchas();
-      canchasLocales.forEach(function (c) {
+      obtenerCanchas().forEach(function (c) {
         sincronizarDocFirestore(COL_CANCHAS, c.id, c);
       });
     }
@@ -107,15 +126,12 @@ function iniciarSincronizacionFirestore(alTerminar) {
   // 2. Usuarios
   db.collection(COL_USUARIOS).onSnapshot(function (snapshot) {
     if (!snapshot.empty) {
-      const lista = [];
-      snapshot.forEach(function (doc) {
-        lista.push(doc.data());
-      });
-      lista.sort(function (a, b) { return a.id - b.id; });
-      guardarLista(CLAVE_USUARIOS, lista);
+      const remota = [];
+      snapshot.forEach(function (doc) { remota.push(doc.data()); });
+      const combinada = combinarConBaseLocal(obtenerUsuarios(), remota);
+      guardarLista(CLAVE_USUARIOS, combinada);
     } else {
-      const usuariosLocales = obtenerUsuarios();
-      usuariosLocales.forEach(function (u) {
+      obtenerUsuarios().forEach(function (u) {
         sincronizarDocFirestore(COL_USUARIOS, u.id, u);
       });
     }
@@ -128,17 +144,10 @@ function iniciarSincronizacionFirestore(alTerminar) {
   // 3. Reservas
   db.collection(COL_RESERVAS).onSnapshot(function (snapshot) {
     if (!snapshot.empty) {
-      const lista = [];
-      snapshot.forEach(function (doc) {
-        lista.push(doc.data());
-      });
-      lista.sort(function (a, b) { return a.id - b.id; });
-      guardarLista(CLAVE_RESERVAS, lista);
-    } else {
-      const reservasLocales = obtenerReservas();
-      reservasLocales.forEach(function (r) {
-        sincronizarDocFirestore(COL_RESERVAS, r.id, r);
-      });
+      const remota = [];
+      snapshot.forEach(function (doc) { remota.push(doc.data()); });
+      const combinada = combinarConBaseLocal(obtenerReservas(), remota, CLAVE_RESERVAS_BORRADAS);
+      guardarLista(CLAVE_RESERVAS, combinada);
     }
     revisarListo();
   }, function (err) {
@@ -150,16 +159,9 @@ function iniciarSincronizacionFirestore(alTerminar) {
   db.collection(COL_BLOQUEOS).onSnapshot(function (snapshot) {
     if (!snapshot.empty) {
       const lista = [];
-      snapshot.forEach(function (doc) {
-        lista.push(doc.data());
-      });
+      snapshot.forEach(function (doc) { lista.push(doc.data()); });
       lista.sort(function (a, b) { return a.id - b.id; });
       guardarLista(CLAVE_BLOQUEOS, lista);
-    } else {
-      const bloqueosLocales = obtenerBloqueos();
-      bloqueosLocales.forEach(function (b) {
-        sincronizarDocFirestore(COL_BLOQUEOS, b.id, b);
-      });
     }
     revisarListo();
   }, function (err) {
@@ -170,17 +172,10 @@ function iniciarSincronizacionFirestore(alTerminar) {
   // 5. Gastos (Finanzas)
   db.collection(COL_GASTOS).onSnapshot(function (snapshot) {
     if (!snapshot.empty) {
-      const lista = [];
-      snapshot.forEach(function (doc) {
-        lista.push(doc.data());
-      });
-      lista.sort(function (a, b) { return a.id - b.id; });
-      guardarLista(CLAVE_GASTOS, lista);
-    } else {
-      const gastosLocales = obtenerGastos();
-      gastosLocales.forEach(function (g) {
-        sincronizarDocFirestore(COL_GASTOS, g.id, g);
-      });
+      const remota = [];
+      snapshot.forEach(function (doc) { remota.push(doc.data()); });
+      const combinada = combinarConBaseLocal(obtenerGastos(), remota, CLAVE_GASTOS_BORRADOS);
+      guardarLista(CLAVE_GASTOS, combinada);
     }
   }, function (err) {
     console.warn('Snapshot gastos error:', err);
@@ -255,7 +250,7 @@ function borrarCanchaPorId(id) {
   return true;
 }
 
-// ---------- reservas (ITU-33, ITU-34, ITU-36) ----------
+// ---------- reservas (ITU-33, ITU-34, ITU-36, ITU-53) ----------
 
 function obtenerReservas() {
   return leerLista(CLAVE_RESERVAS);
@@ -314,6 +309,11 @@ function borrarReservaPorId(id) {
     return r.id !== id;
   });
   if (filtrada.length === lista.length) return false;
+  const borrados = leerLista(CLAVE_RESERVAS_BORRADAS);
+  if (borrados.indexOf(id) === -1) {
+    borrados.push(id);
+    localStorage.setItem(CLAVE_RESERVAS_BORRADAS, JSON.stringify(borrados));
+  }
   guardarLista(CLAVE_RESERVAS, filtrada);
   borrarDocFirestore(COL_RESERVAS, id);
   return true;
@@ -374,6 +374,11 @@ function borrarGastoPorId(id) {
     return g.id !== id;
   });
   if (filtrada.length === lista.length) return false;
+  const borrados = leerLista(CLAVE_GASTOS_BORRADOS);
+  if (borrados.indexOf(id) === -1) {
+    borrados.push(id);
+    localStorage.setItem(CLAVE_GASTOS_BORRADOS, JSON.stringify(borrados));
+  }
   guardarLista(CLAVE_GASTOS, filtrada);
   borrarDocFirestore(COL_GASTOS, id);
   return true;
@@ -383,7 +388,7 @@ function borrarGastoPorId(id) {
 
 function configDiasPorDefecto() {
   return {
-    0: { nombre: 'Domingo', cerrado: false, apertura: 9, cierre: 14, etiqueta: 'Medio tiempo (09:00 a 14:00 hs)' },
+    0: { nombre: 'Domingo', cerrado: false, apertura: 8, cierre: 22, etiqueta: 'Horario fin de semana (08:00 a 22:00 hs)' },
     1: { nombre: 'Lunes', cerrado: false, apertura: 8, cierre: 23, etiqueta: 'Horario completo' },
     2: { nombre: 'Martes', cerrado: false, apertura: 8, cierre: 23, etiqueta: 'Horario completo' },
     3: { nombre: 'Miércoles', cerrado: false, apertura: 8, cierre: 23, etiqueta: 'Horario completo' },
@@ -431,92 +436,285 @@ function borrarSesion() {
   sessionStorage.removeItem(CLAVE_SESION);
 }
 
-// ---------- datos iniciales ----------
+// ---------- generador realista desde Junio en adelante (> $10M/mes y 70% gastos) ----------
 
-function asegurarUsuariosDePrueba() {
-  const usuarios = obtenerUsuarios();
-  let modificado = false;
+function generarDatasetHistoricoDesdeJunio() {
+  const hashJugador = 'ba28916b3193c66d58dd2848c344310c1472752aadb6c98e8d41621d3289cbe2';
+  const hashAdmin = '2097dc8a6d3529da276b308110f65452a7aec28b5dfae1a815f924c53c639bae';
 
-  // Hashes SHA-256 precalculados para 123456 y admin123
-  // de forma que nunca se almacene la contraseña en texto plano
-  const hashJugador = '5ea6198f7e2d93ee3000b9576bb5ff64db9f2e3be75e5b0cb59f08ea730ca781';
-  const hashAdmin = '918bf0a0c4f1c9fe34fec8b7fc9f62ebefbe60a3dcda38e2ea55c8c67c5e5330';
+  const usuarios = [
+    { id: 1, nombre: 'Jugador de Prueba', email: 'jugador@padelya.com', telefono: '+54 9 261 412-3301', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 2, nombre: 'Administrador PadelYa', email: 'admin@padelya.com', telefono: '+54 9 261 555-0100', passwordHash: hashAdmin, rol: 'admin' },
+    { id: 3, nombre: 'Martín Gómez', email: 'martin.gomez@gmail.com', telefono: '+54 9 261 510-4412', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 4, nombre: 'Lucas Fernández', email: 'lucas.fernandez@gmail.com', telefono: '+54 9 261 622-8910', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 5, nombre: 'Santiago Quiroga', email: 'santi.quiroga@gmail.com', telefono: '+54 9 261 588-1209', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 6, nombre: 'Valentina Sosa', email: 'valen.sosa@gmail.com', telefono: '+54 9 261 341-7723', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 7, nombre: 'Nicolás Pereyra', email: 'nico.pereyra@gmail.com', telefono: '+54 9 261 490-5561', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 8, nombre: 'Camila Ruíz', email: 'cami.ruiz@gmail.com', telefono: '+54 9 261 671-3348', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 9, nombre: 'Facundo Morales', email: 'facu.morales@gmail.com', telefono: '+54 9 261 533-9014', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 10, nombre: 'Julián Moyano', email: 'julian.moyano@gmail.com', telefono: '+54 9 261 477-2108', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 11, nombre: 'Agustina Lucero', email: 'agus.lucero@gmail.com', telefono: '+54 9 261 592-6481', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 12, nombre: 'Matías Orozco', email: 'mati.orozco@gmail.com', telefono: '+54 9 261 604-1195', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 13, nombre: 'Franco Villalba', email: 'franco.villalba@gmail.com', telefono: '+54 9 261 518-8832', passwordHash: hashJugador, rol: 'jugador' },
+    { id: 14, nombre: 'Sofía Albornoz', email: 'sofi.albornoz@gmail.com', telefono: '+54 9 261 465-7029', passwordHash: hashJugador, rol: 'jugador' }
+  ];
 
-  const idxJugador = usuarios.findIndex(function (u) { return u.email === 'jugador@padelya.com'; });
-  if (idxJugador === -1) {
-    const nuevoJ = {
-      id: nuevoId(usuarios),
-      nombre: 'Jugador de Prueba',
-      email: 'jugador@padelya.com',
-      passwordHash: hashJugador,
-      rol: 'jugador'
-    };
-    usuarios.push(nuevoJ);
-    sincronizarDocFirestore(COL_USUARIOS, nuevoJ.id, nuevoJ);
-    modificado = true;
-  } else if (!usuarios[idxJugador].passwordHash) {
-    delete usuarios[idxJugador].password;
-    usuarios[idxJugador].passwordHash = hashJugador;
-    sincronizarDocFirestore(COL_USUARIOS, usuarios[idxJugador].id, usuarios[idxJugador]);
-    modificado = true;
-  }
+  const canchas = [
+    { id: 1, nombre: 'Cancha 1', tipo: 'Techada', precioPorHora: 25000, caracteristicas: 'Nave indoor climatizada · Blindex 12mm · Césped sintético · LED', activa: true },
+    { id: 2, nombre: 'Cancha 2', tipo: 'Techada', precioPorHora: 25000, caracteristicas: 'Nave indoor climatizada · Blindex 12mm · Césped sintético · LED', activa: true },
+    { id: 3, nombre: 'Cancha 3', tipo: 'Descubierta', precioPorHora: 20000, caracteristicas: 'Exterior panorámica · Blindex · Césped sintético · Iluminación LED', activa: true },
+    { id: 4, nombre: 'Cancha 4', tipo: 'Techada', precioPorHora: 25000, caracteristicas: 'Cancha Central Indoor · Alfombra WPT Azul · Blindex Panorámico', activa: true }
+  ];
 
-  const idxAdmin = usuarios.findIndex(function (u) { return u.email === 'admin@padelya.com'; });
-  if (idxAdmin === -1) {
-    const nuevoA = {
-      id: nuevoId(usuarios),
-      nombre: 'Administrador PadelYa',
-      email: 'admin@padelya.com',
-      passwordHash: hashAdmin,
-      rol: 'admin'
-    };
-    usuarios.push(nuevoA);
-    sincronizarDocFirestore(COL_USUARIOS, nuevoA.id, nuevoA);
-    modificado = true;
-  } else if (!usuarios[idxAdmin].passwordHash) {
-    delete usuarios[idxAdmin].password;
-    usuarios[idxAdmin].passwordHash = hashAdmin;
-    sincronizarDocFirestore(COL_USUARIOS, usuarios[idxAdmin].id, usuarios[idxAdmin]);
-    modificado = true;
-  }
+  const preciosCancha = { 1: 25000, 2: 25000, 3: 20000, 4: 25000 };
+  const jugadoresIds = [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
 
-  if (modificado) {
-    guardarLista(CLAVE_USUARIOS, usuarios);
-  }
+  // Plantilla de 10 reservas para días de semana (Lunes a Jueves: 10 reservas = 15 turnos vendidos/día)
+  // Ninguna reserva repite horario para el mismo jugador ni en la misma cancha
+  const slotsDiaSemana = [
+    { canchaId: 1, horaInicio: 9, cant: 2 },
+    { canchaId: 1, horaInicio: 18, cant: 2 },
+    { canchaId: 1, horaInicio: 20, cant: 2 },
+    { canchaId: 2, horaInicio: 10, cant: 1 },
+    { canchaId: 2, horaInicio: 17, cant: 2 },
+    { canchaId: 2, horaInicio: 19, cant: 2 },
+    { canchaId: 3, horaInicio: 16, cant: 1 },
+    { canchaId: 3, horaInicio: 18, cant: 1 },
+    { canchaId: 4, horaInicio: 15, cant: 1 },
+    { canchaId: 4, horaInicio: 21, cant: 1 }
+  ];
+
+  // Plantilla de 15 reservas para Viernes y Sábados (Fines de semana con alta ocupación = 23 turnos vendidos/día)
+  const slotsFinDeSemana = [
+    { canchaId: 1, horaInicio: 9, cant: 2 },
+    { canchaId: 1, horaInicio: 11, cant: 2 },
+    { canchaId: 1, horaInicio: 17, cant: 2 },
+    { canchaId: 1, horaInicio: 19, cant: 2 },
+    { canchaId: 2, horaInicio: 8, cant: 2 },
+    { canchaId: 2, horaInicio: 14, cant: 2 },
+    { canchaId: 2, horaInicio: 18, cant: 2 },
+    { canchaId: 2, horaInicio: 20, cant: 1 },
+    { canchaId: 3, horaInicio: 10, cant: 1 },
+    { canchaId: 3, horaInicio: 15, cant: 2 },
+    { canchaId: 3, horaInicio: 19, cant: 1 },
+    { canchaId: 4, horaInicio: 9, cant: 1 },
+    { canchaId: 4, horaInicio: 12, cant: 1 },
+    { canchaId: 4, horaInicio: 16, cant: 1 },
+    { canchaId: 4, horaInicio: 21, cant: 1 }
+  ];
+
+  // Plantilla de 13 reservas para Domingos (19 turnos vendidos/día)
+  const slotsDomingo = [
+    { canchaId: 1, horaInicio: 9, cant: 2 },
+    { canchaId: 1, horaInicio: 11, cant: 2 },
+    { canchaId: 1, horaInicio: 17, cant: 2 },
+    { canchaId: 1, horaInicio: 19, cant: 1 },
+    { canchaId: 2, horaInicio: 10, cant: 2 },
+    { canchaId: 2, horaInicio: 16, cant: 2 },
+    { canchaId: 2, horaInicio: 18, cant: 1 },
+    { canchaId: 3, horaInicio: 9, cant: 1 },
+    { canchaId: 3, horaInicio: 15, cant: 2 },
+    { canchaId: 3, horaInicio: 18, cant: 1 },
+    { canchaId: 4, horaInicio: 10, cant: 1 },
+    { canchaId: 4, horaInicio: 16, cant: 1 },
+    { canchaId: 4, horaInicio: 20, cant: 1 }
+  ];
+
+  const meses = [
+    { anio: 2026, mes: 6, dias: 30, nombre: 'Junio 2026' },
+    { anio: 2026, mes: 7, dias: 31, nombre: 'Julio 2026' },
+    { anio: 2026, mes: 8, dias: 31, nombre: 'Agosto 2026' },
+    { anio: 2026, mes: 9, dias: 30, nombre: 'Septiembre 2026' },
+    { anio: 2026, mes: 10, dias: 31, nombre: 'Octubre 2026' },
+    { anio: 2026, mes: 11, dias: 30, nombre: 'Noviembre 2026' }
+  ];
+
+  const reservas = [];
+  const gastos = [];
+  let idReserva = 1;
+  let idGasto = 1;
+
+  meses.forEach(function (infoMes, idxMes) {
+    let ingresosMes = 0;
+    const prefijoMes = infoMes.anio + '-' + String(infoMes.mes).padStart(2, '0');
+
+    for (let dia = 1; dia <= infoMes.dias; dia++) {
+      const fechaISO = prefijoMes + '-' + String(dia).padStart(2, '0');
+      const objFecha = new Date(fechaISO + 'T00:00:00');
+      const diaSemana = objFecha.getDay(); // 0 = Dom, 5 = Vie, 6 = Sáb
+
+      let plantilla = slotsDiaSemana;
+      if (diaSemana === 5 || diaSemana === 6) {
+        plantilla = slotsFinDeSemana;
+      } else if (diaSemana === 0) {
+        plantilla = slotsDomingo;
+      }
+
+      plantilla.forEach(function (slot, idxSlot) {
+        // Asignamos un jugador distinto por cada slot del día para que nunca se pisen horarios del mismo jugador
+        const idUsuario = jugadoresIds[(dia + idxSlot + idxMes) % jugadoresIds.length];
+        const objUsuario = usuarios.find(function (u) { return u.id === idUsuario; });
+        const precioTotal = slot.cant * preciosCancha[slot.canchaId];
+
+        ingresosMes += precioTotal;
+
+        reservas.push({
+          id: idReserva++,
+          usuarioId: idUsuario,
+          jugadorNombre: objUsuario ? objUsuario.nombre : 'Jugador #' + idUsuario,
+          jugadorTelefono: objUsuario ? objUsuario.telefono : '+54 9 261 555-0199',
+          canchaId: slot.canchaId,
+          fecha: fechaISO,
+          horaInicio: slot.horaInicio,
+          horaFin: slot.horaInicio + slot.cant,
+          cantidadTurnos: slot.cant,
+          precioTotal: precioTotal,
+          estado: 'confirmada'
+        });
+      });
+    }
+
+    // Gastos mensuales equivalentes exactamente al 70% de los ingresos de este mes
+    const totalGastosMes = Math.round(ingresosMes * 0.70);
+    const partidasMes = [
+      {
+        dia: '05',
+        proporcion: 0.25,
+        categoria: 'Personal & Sueldos',
+        concepto: 'Sueldos mensuales Encargado General y Recepcionistas (' + infoMes.nombre + ')',
+        metodoPago: 'Transferencia',
+        comprobante: 'Recibo Haberes #' + infoMes.mes + '01'
+      },
+      {
+        dia: '05',
+        proporcion: 0.18,
+        categoria: 'Personal & Sueldos',
+        concepto: 'Sueldos mensuales Cancheros y Personal de Mantenimiento (' + infoMes.nombre + ')',
+        metodoPago: 'Transferencia',
+        comprobante: 'Recibo Haberes #' + infoMes.mes + '02'
+      },
+      {
+        dia: '07',
+        proporcion: 0.12,
+        categoria: 'Personal & Sueldos',
+        concepto: 'Sueldos Personal Limpieza, Buffet y Cargas Sociales AFIP F.931 (' + infoMes.nombre + ')',
+        metodoPago: 'Transferencia',
+        comprobante: 'AFIP VEP #' + infoMes.mes + '03'
+      },
+      {
+        dia: '10',
+        proporcion: 0.14,
+        categoria: 'Impuestos & Alquiler',
+        concepto: 'Alquiler mensual predio complejo deportivo y seguro integral (' + infoMes.nombre + ')',
+        metodoPago: 'Transferencia',
+        comprobante: 'Factura A-00' + infoMes.mes + '10'
+      },
+      {
+        dia: '12',
+        proporcion: 0.09,
+        categoria: 'Servicios',
+        concepto: 'Factura Energía Eléctrica EDEMSA - Iluminación LED naves indoor (' + infoMes.nombre + ')',
+        metodoPago: 'Transferencia',
+        comprobante: 'EDEMSA #' + infoMes.mes + '442'
+      },
+      {
+        dia: '15',
+        proporcion: 0.07,
+        categoria: 'Mantenimiento',
+        concepto: 'Mantenimiento preventivo césped sintético, arena de sílice y cristales Blindex',
+        metodoPago: 'Transferencia',
+        comprobante: 'Factura B-00' + infoMes.mes + '18'
+      },
+      {
+        dia: '18',
+        proporcion: 0.05,
+        categoria: 'Insumos & Pelotas',
+        concepto: 'Reposición de cajones de pelotas presurizadas, redes y overgrips',
+        metodoPago: 'Tarjeta / Débito',
+        comprobante: 'Factura A-00' + infoMes.mes + '25'
+      },
+      {
+        dia: '20',
+        proporcion: 0.05,
+        categoria: 'Buffet & Bebidas',
+        concepto: 'Compra mayorista bebidas isotónicas, aguas minerales y cafetería Buffet',
+        metodoPago: 'Transferencia',
+        comprobante: 'Distribuidora #' + infoMes.mes + '89'
+      },
+      {
+        dia: '22',
+        proporcion: 0.03,
+        categoria: 'Impuestos & Alquiler',
+        concepto: 'Tasas Municipales, Ingresos Brutos ATM y honorarios contables (' + infoMes.nombre + ')',
+        metodoPago: 'Transferencia',
+        comprobante: 'ATM #' + infoMes.mes + '71'
+      },
+      {
+        dia: '25',
+        proporcion: 0.02,
+        categoria: 'Servicios',
+        concepto: 'Agua AYSAM, Gas vestuarios e Internet Fibra Óptica Wi-Fi Club',
+        metodoPago: 'Tarjeta / Débito',
+        comprobante: 'Servicios #' + infoMes.mes + '95'
+      }
+    ];
+
+    let acumuladoGastos = 0;
+    partidasMes.forEach(function (p, idxP) {
+      let montoPartida;
+      if (idxP === partidasMes.length - 1) {
+        // ajuste de redondeo en la última partida para que sume exactamente el 70%
+        montoPartida = totalGastosMes - acumuladoGastos;
+      } else {
+        montoPartida = Math.round(totalGastosMes * p.proporcion);
+        acumuladoGastos += montoPartida;
+      }
+
+      gastos.push({
+        id: idGasto++,
+        fecha: prefijoMes + '-' + p.dia,
+        concepto: p.concepto,
+        categoria: p.categoria,
+        metodoPago: p.metodoPago,
+        monto: montoPartida,
+        comprobante: p.comprobante
+      });
+    });
+  });
+
+  return {
+    usuarios: usuarios,
+    canchas: canchas,
+    reservas: reservas,
+    gastos: gastos
+  };
 }
 
 function cargarDatosIniciales() {
-  asegurarUsuariosDePrueba();
-
   if (localStorage.getItem(CLAVE_CONFIG_DIAS) === null) {
     guardarConfigDias(configDiasPorDefecto());
   }
 
-  if (localStorage.getItem(CLAVE_CANCHAS) === null || obtenerCanchas().length === 0) {
-    const canchasIni = [
-      { id: 1, nombre: 'Cancha 1', tipo: 'Techada', precioPorHora: 25000, activa: true },
-      { id: 2, nombre: 'Cancha 2', tipo: 'Techada', precioPorHora: 25000, activa: true },
-      { id: 3, nombre: 'Cancha 3', tipo: 'Descubierta', precioPorHora: 20000, activa: true },
-      { id: 4, nombre: 'Cancha 4', tipo: 'Descubierta', precioPorHora: 20000, activa: false }
-    ];
-    guardarLista(CLAVE_CANCHAS, canchasIni);
-    canchasIni.forEach(function (c) {
+  // Si todavía no se aplicó el seed histórico desde Junio v3, lo generamos y guardamos
+  if (localStorage.getItem(CLAVE_VERSION_SEED) !== 'true') {
+    const dataset = generarDatasetHistoricoDesdeJunio();
+    guardarLista(CLAVE_USUARIOS, dataset.usuarios);
+    guardarLista(CLAVE_CANCHAS, dataset.canchas);
+    guardarLista(CLAVE_RESERVAS, dataset.reservas);
+    guardarLista(CLAVE_GASTOS, dataset.gastos);
+    localStorage.setItem(CLAVE_RESERVAS_BORRADAS, JSON.stringify([]));
+    localStorage.setItem(CLAVE_GASTOS_BORRADOS, JSON.stringify([]));
+    localStorage.setItem(CLAVE_VERSION_SEED, 'true');
+
+    // Sincronizamos usuarios, canchas y los 60 gastos mensuales a Firestore
+    dataset.usuarios.forEach(function (u) {
+      sincronizarDocFirestore(COL_USUARIOS, u.id, u);
+    });
+    dataset.canchas.forEach(function (c) {
       sincronizarDocFirestore(COL_CANCHAS, c.id, c);
     });
-  }
-
-  if (localStorage.getItem(CLAVE_RESERVAS) === null) {
-    const hoy = hoyISO();
-    const manana = sumarDias(hoy, 1);
-    const reservasIni = [
-      { id: 1, usuarioId: 1, canchaId: 1, fecha: hoy, horaInicio: 20, horaFin: 22, cantidadTurnos: 2, precioTotal: 50000, estado: 'confirmada' },
-      { id: 2, usuarioId: 1, canchaId: 1, fecha: manana, horaInicio: 18, horaFin: 20, cantidadTurnos: 2, precioTotal: 50000, estado: 'confirmada' },
-      { id: 3, usuarioId: 1, canchaId: 2, fecha: manana, horaInicio: 19, horaFin: 20, cantidadTurnos: 1, precioTotal: 25000, estado: 'confirmada' },
-      { id: 4, usuarioId: 1, canchaId: 3, fecha: manana, horaInicio: 21, horaFin: 22, cantidadTurnos: 1, precioTotal: 20000, estado: 'confirmada' }
-    ];
-    guardarLista(CLAVE_RESERVAS, reservasIni);
-    reservasIni.forEach(function (r) {
-      sincronizarDocFirestore(COL_RESERVAS, r.id, r);
+    dataset.gastos.forEach(function (g) {
+      sincronizarDocFirestore(COL_GASTOS, g.id, g);
     });
   }
 
@@ -525,54 +723,17 @@ function cargarDatosIniciales() {
     const bloqueosIni = [
       {
         id: 1,
-        canchaId: 2,
+        canchaId: 3,
         fecha: hoy,
-        horaInicio: 14,
-        horaFin: 16,
+        horaInicio: 13,
+        horaFin: 15,
         tipoBloqueo: 'franja',
-        motivo: 'Mantenimiento de iluminación LED'
+        motivo: 'Mantenimiento preventivo de iluminación LED'
       }
     ];
     guardarLista(CLAVE_BLOQUEOS, bloqueosIni);
     bloqueosIni.forEach(function (b) {
       sincronizarDocFirestore(COL_BLOQUEOS, b.id, b);
-    });
-  }
-
-  if (localStorage.getItem(CLAVE_GASTOS) === null) {
-    const hoy = hoyISO();
-    const gastosIni = [
-      {
-        id: 1,
-        fecha: hoy,
-        concepto: 'Compra de 6 tubos de pelotas presurizadas',
-        categoria: 'Insumos & Pelotas',
-        metodoPago: 'Transferencia',
-        monto: 18000,
-        comprobante: 'Factura A-00142'
-      },
-      {
-        id: 2,
-        fecha: hoy,
-        concepto: 'Mantenimiento y cepillado de césped sintético Cancha 1 y 2',
-        categoria: 'Mantenimiento',
-        metodoPago: 'Efectivo / Caja',
-        monto: 15000,
-        comprobante: 'Recibo #408'
-      },
-      {
-        id: 3,
-        fecha: hoy,
-        concepto: 'Proporcional energía eléctrica iluminación LED',
-        categoria: 'Servicios',
-        metodoPago: 'Transferencia',
-        monto: 12000,
-        comprobante: 'Edemsa #9921'
-      }
-    ];
-    guardarLista(CLAVE_GASTOS, gastosIni);
-    gastosIni.forEach(function (g) {
-      sincronizarDocFirestore(COL_GASTOS, g.id, g);
     });
   }
 }
