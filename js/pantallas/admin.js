@@ -260,15 +260,24 @@ function dibujarReservasDelDia() {
     tr.appendChild(crear('td', '', cantTurnos === 1 ? '1 turno (1h)' : cantTurnos + ' turnos (' + cantTurnos + 'hs)'));
     tr.appendChild(crear('td', '', formatearPrecio(total)));
 
+    const yaPaso = turnoYaPaso(r.fecha, r.horaInicio);
+
     const tdEstado = crear('td');
-    const claseBadge = r.estado === 'cancelada' ? 'cancelada' : 'confirmada';
-    const textoBadge = r.estado === 'cancelada' ? 'Cancelada' : 'Confirmada';
+    let claseBadge = 'confirmada';
+    let textoBadge = 'Confirmada';
+    if (r.estado === 'cancelada') {
+      claseBadge = 'cancelada';
+      textoBadge = 'Cancelada';
+    } else if (yaPaso) {
+      claseBadge = 'pasada';
+      textoBadge = 'Cumplida';
+    }
     tdEstado.appendChild(crear('span', 'estado-badge ' + claseBadge, textoBadge));
     tr.appendChild(tdEstado);
 
     const tdAcciones = crear('td');
     const cajaBtns = crear('div', 'acciones');
-    if (r.estado === 'confirmada') {
+    if (r.estado === 'confirmada' && !yaPaso) {
       const btnCancelar = crear('button', 'btn btn-peligro btn-chico', 'Cancelar');
       btnCancelar.type = 'button';
       btnCancelar.addEventListener('click', function () {
@@ -277,15 +286,21 @@ function dibujarReservasDelDia() {
         dibujarReservasDelDia();
       });
       cajaBtns.appendChild(btnCancelar);
+    } else if (r.estado === 'confirmada' && yaPaso) {
+      const etiquetaCerrada = crear('small', '', '🔒 Turno realizado (no cancelable)');
+      etiquetaCerrada.style.color = 'var(--texto-sec)';
+      etiquetaCerrada.style.fontWeight = '600';
+      cajaBtns.appendChild(etiquetaCerrada);
+    } else if (r.estado === 'cancelada') {
+      const btnBorrar = crear('button', 'btn btn-sec btn-chico', 'Borrar');
+      btnBorrar.type = 'button';
+      btnBorrar.addEventListener('click', function () {
+        const res = eliminarReservaDeHistorial(r.id);
+        mostrarMensaje('mensaje-admin', res.mensaje, res.ok ? 'ok' : 'error');
+        dibujarReservasDelDia();
+      });
+      cajaBtns.appendChild(btnBorrar);
     }
-    const btnBorrar = crear('button', 'btn btn-sec btn-chico', 'Borrar');
-    btnBorrar.type = 'button';
-    btnBorrar.addEventListener('click', function () {
-      const res = eliminarReservaDeHistorial(r.id);
-      mostrarMensaje('mensaje-admin', res.mensaje, res.ok ? 'ok' : 'error');
-      dibujarReservasDelDia();
-    });
-    cajaBtns.appendChild(btnBorrar);
     tdAcciones.appendChild(cajaBtns);
     tr.appendChild(tdAcciones);
 

@@ -157,7 +157,7 @@ function crearTarjetaReserva(reserva, claseEstado, textoEstado, puedeCancelar) {
 
     cajaAcciones.appendChild(btnCancelar);
     cajaAcciones.appendChild(cajaConfirmar);
-  } else {
+  } else if (reserva.estado === 'cancelada') {
     const btnEliminar = crear('button', 'btn btn-sec btn-chico', 'Eliminar del historial');
     btnEliminar.type = 'button';
     btnEliminar.addEventListener('click', function () {
@@ -166,6 +166,12 @@ function crearTarjetaReserva(reserva, claseEstado, textoEstado, puedeCancelar) {
       dibujarMisReservas();
     });
     cajaAcciones.appendChild(btnEliminar);
+  } else {
+    const infoFinalizada = crear('small', '', '🔒 Partido realizado · No se puede cancelar');
+    infoFinalizada.style.color = 'var(--texto-sec)';
+    infoFinalizada.style.fontWeight = '600';
+    infoFinalizada.style.textAlign = 'center';
+    cajaAcciones.appendChild(infoFinalizada);
   }
 
   tarjeta.appendChild(cajaAcciones);

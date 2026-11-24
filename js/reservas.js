@@ -340,8 +340,9 @@ function cancelarReserva(reservaId) {
     return { ok: false, mensaje: 'Esta reserva ya estaba cancelada' };
   }
 
-  if (usuario.rol !== 'admin' && turnoYaPaso(reserva.fecha, reserva.horaInicio)) {
-    return { ok: false, mensaje: 'No se puede cancelar un turno que ya comenzó o finalizó' };
+  // Ni el jugador ni el administrador pueden cancelar una reserva cuyo horario ya pasó (ya se realizó)
+  if (turnoYaPaso(reserva.fecha, reserva.horaInicio)) {
+    return { ok: false, mensaje: 'No se puede cancelar una reserva que ya comenzó o ya se realizó' };
   }
 
   actualizarEstadoReserva(reserva.id, 'cancelada');
@@ -364,6 +365,10 @@ function eliminarReservaDeHistorial(reservaId) {
 
   if (reserva.usuarioId !== usuario.id && usuario.rol !== 'admin') {
     return { ok: false, mensaje: 'Solo podés eliminar tus propias reservas' };
+  }
+
+  if (reserva.estado === 'confirmada' && turnoYaPaso(reserva.fecha, reserva.horaInicio)) {
+    return { ok: false, mensaje: 'No se puede eliminar ni cancelar una reserva que ya se realizó' };
   }
 
   borrarReservaPorId(reserva.id);
@@ -441,10 +446,11 @@ function registrarBloqueoAdmin(datos) {
     });
   }
 
-  // verificamos si hay reservas confirmadas en esos rangos
+  // verificamos si hay reservas confirmadas futuras en esos rangos (las que ya se realizaron no se cancelan)
   const reservas = obtenerReservas();
   const afectadas = reservas.filter(function (r) {
     if (r.fecha !== fecha || r.estado !== 'confirmada') return false;
+    if (turnoYaPaso(r.fecha, r.horaInicio)) return false;
     if (canchaId !== 0 && r.canchaId !== canchaId) return false;
     const rFin = obtenerHoraFin(r);
     return rangosABloquear.some(function (b) {
