@@ -106,9 +106,47 @@ function armarBarra() {
   if (usuario !== null) {
     links.appendChild(crear('span', 'saludo', 'Hola, ' + usuario.nombre));
     if (usuario.rol === 'admin') {
-      const enlaceAdmin = crear('a', paginaActual === 'admin.html' ? 'activo' : '', '⚙️ Panel Admin');
-      enlaceAdmin.href = 'admin.html';
-      links.appendChild(enlaceAdmin);
+      const contenedorSelector = crear('div', 'selector-panel-nav');
+      const btnSelector = crear(
+        'button',
+        'btn-selector-panel ' + ((paginaActual === 'admin.html' || paginaActual === 'finanzas.html') ? 'activo' : ''),
+        paginaActual === 'finanzas.html' ? '💼 Panel Finanzas ▾' : '🏟️ Panel Canchas ▾'
+      );
+      btnSelector.type = 'button';
+
+      const menuPaneles = crear('div', 'menu-selector-panel oculto');
+
+      const opcionCanchas = crear('a', 'opcion-panel' + (paginaActual === 'admin.html' ? ' seleccionado' : ''));
+      opcionCanchas.href = 'admin.html';
+      opcionCanchas.appendChild(crear('span', 'opcion-panel-icono', '🏟️'));
+      const txtCanchas = crear('div', 'opcion-panel-texto');
+      txtCanchas.appendChild(crear('strong', '', 'Panel Canchas'));
+      txtCanchas.appendChild(crear('small', '', 'Reservas del día, horarios y canchas'));
+      opcionCanchas.appendChild(txtCanchas);
+
+      const opcionFinanzas = crear('a', 'opcion-panel' + (paginaActual === 'finanzas.html' ? ' seleccionado' : ''));
+      opcionFinanzas.href = 'finanzas.html';
+      opcionFinanzas.appendChild(crear('span', 'opcion-panel-icono', '💼'));
+      const txtFinanzas = crear('div', 'opcion-panel-texto');
+      txtFinanzas.appendChild(crear('strong', '', 'Panel Finanzas'));
+      txtFinanzas.appendChild(crear('small', '', 'Ingresos, registro de gastos y balance neto'));
+      opcionFinanzas.appendChild(txtFinanzas);
+
+      menuPaneles.appendChild(opcionCanchas);
+      menuPaneles.appendChild(opcionFinanzas);
+
+      btnSelector.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menuPaneles.classList.toggle('oculto');
+      });
+
+      document.addEventListener('click', function () {
+        menuPaneles.classList.add('oculto');
+      });
+
+      contenedorSelector.appendChild(btnSelector);
+      contenedorSelector.appendChild(menuPaneles);
+      links.appendChild(contenedorSelector);
     }
     const enlaceCanchas = crear('a', paginaActual === 'canchas.html' || paginaActual === 'disponibilidad.html' ? 'activo' : '', 'Canchas');
     enlaceCanchas.href = 'canchas.html';

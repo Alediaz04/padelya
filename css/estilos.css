@@ -1283,3 +1283,346 @@ body {
   .club-banner { padding: 20px; }
   .club-info h1 { font-size: 1.4rem; }
 }
+
+/* ---------- selector de paneles administrativos (Canchas vs. Finanzas) ---------- */
+.selector-panel-nav {
+  position: relative;
+}
+.btn-selector-panel {
+  background: rgba(190, 242, 100, 0.14);
+  color: var(--lima);
+  border: 1.5px solid rgba(190, 242, 100, 0.4);
+  padding: 7px 14px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.btn-selector-panel:hover,
+.btn-selector-panel.activo {
+  background: var(--lima);
+  color: var(--azul);
+  border-color: var(--lima);
+}
+.menu-selector-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  box-shadow: var(--sombra-lg);
+  padding: 8px;
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.opcion-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  text-decoration: none;
+  color: var(--texto) !important;
+  border: 1.5px solid transparent;
+  transition: all 0.15s ease;
+}
+.opcion-panel:hover {
+  background: #f8fafc !important;
+  border-color: var(--borde);
+}
+.opcion-panel.seleccionado {
+  background: var(--verde-suave) !important;
+  border-color: #a7f3d0;
+}
+.opcion-panel-icono {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.opcion-panel-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.opcion-panel-texto strong {
+  font-size: 0.92rem;
+  color: var(--azul);
+}
+.opcion-panel-texto small {
+  font-size: 0.76rem;
+  color: var(--texto-sec);
+  font-weight: 500;
+}
+
+.club-acciones-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 1;
+}
+.selector-modulo-banner {
+  background: rgba(11, 25, 44, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 10px 12px;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+.selector-modulo-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+.selector-modulo-botones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-modulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.18s ease;
+}
+.btn-modulo:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.btn-modulo.activo {
+  background: var(--lima);
+  color: var(--azul);
+  border-color: var(--lima);
+  box-shadow: 0 4px 12px rgba(190, 242, 100, 0.28);
+}
+
+/* ---------- panel de finanzas (Sprint 3) ---------- */
+.banner-finanzas {
+  background: linear-gradient(135deg, #0b192c 0%, #102a45 55%, #064e3b 100%);
+}
+
+.periodo-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.periodo-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btn-periodo {
+  background: #f8fafc;
+  color: var(--azul-medio);
+  border: 1.5px solid var(--borde);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-periodo:hover {
+  border-color: var(--azul-claro);
+  background: #fff;
+}
+.btn-periodo.activo {
+  background: var(--azul);
+  color: var(--lima);
+  border-color: var(--azul);
+}
+.periodo-fechas-custom {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.periodo-fechas-custom .campo {
+  margin-bottom: 0;
+}
+.periodo-fechas-custom input {
+  padding: 7px 10px;
+  font-size: 0.88rem;
+}
+
+.finanzas-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.kpi-fin-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 4px solid var(--azul);
+}
+.kpi-fin-card.kpi-ingresos {
+  border-top-color: var(--verde);
+}
+.kpi-fin-card.kpi-gastos {
+  border-top-color: var(--rojo);
+}
+.kpi-fin-card.kpi-neto.neto-positivo {
+  border-top-color: var(--verde-oscuro);
+  background: linear-gradient(180deg, #ffffff 0%, #ecfdf5 100%);
+}
+.kpi-fin-card.kpi-neto.neto-negativo {
+  border-top-color: var(--rojo);
+  background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+}
+.kpi-fin-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.kpi-fin-top span:first-child {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--texto-sec);
+}
+.kpi-fin-icono {
+  font-size: 1.25rem;
+}
+.kpi-fin-card strong {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: var(--azul);
+  letter-spacing: -0.5px;
+}
+.kpi-fin-card.kpi-ingresos strong { color: var(--verde-oscuro); }
+.kpi-fin-card.kpi-gastos strong { color: #b91c1c; }
+.kpi-fin-card.neto-positivo strong { color: #047857; }
+.kpi-fin-card.neto-negativo strong { color: #b91c1c; }
+.kpi-fin-card small {
+  font-size: 0.8rem;
+  color: var(--texto-sec);
+  font-weight: 600;
+}
+
+.barra-relacion-wrap {
+  height: 8px;
+  background: #fee2e2;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 2px 0;
+}
+.barra-relacion-ingresos {
+  height: 100%;
+  background: var(--verde);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.grilla-analitica-finanzas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 18px;
+  margin-bottom: 4px;
+}
+.lista-barras-finanzas {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 10px;
+}
+.item-barra-fin {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.item-barra-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.item-barra-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.item-barra-titulo small,
+.item-barra-valores small {
+  font-size: 0.78rem;
+  color: var(--texto-sec);
+  font-weight: 600;
+}
+.item-barra-valores {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.pista-barra-fin {
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.relleno-barra-fin {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.badge-categoria-gasto {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.texto-ingreso {
+  color: var(--verde-oscuro) !important;
+  font-weight: 800;
+}
+.texto-gasto {
+  color: #b91c1c !important;
+  font-weight: 800;
+}
+
+@media print {
+  .barra, .pie, .no-print, .club-acciones-panel {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .contenedor {
+    max-width: 100%;
+    padding: 0;
+  }
+  .tarjeta, .kpi-fin-card {
+    box-shadow: none;
+    border: 1px solid #cbd5e1;
+    break-inside: avoid;
+  }
+}

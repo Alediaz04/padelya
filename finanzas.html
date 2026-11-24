@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de Finanzas - PadelYa</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+
+<body>
+  <header id="barra" class="barra"></header>
+
+  <main class="contenedor">
+    <!-- Cabecera del Panel de Finanzas con Selector de Módulos -->
+    <section class="club-banner banner-finanzas">
+      <div class="club-info">
+        <span class="club-badge-top">Panel de Control </span>
+        <h1>Panel de Finanzas &amp; Balance</h1>
+        <div class="club-meta">
+          <span>💰 Ingresos por reservas</span>
+          <span>📉 Registro de gastos por categoría</span>
+          
+        </div>
+      </div>
+      <div class="club-acciones-panel">
+        <div class="selector-modulo-banner">
+          <span class="selector-modulo-label">Seleccionar panel administrativo:</span>
+          <div class="selector-modulo-botones">
+            <a href="admin.html" class="btn-modulo">🏟️ Panel Canchas</a>
+            <a href="finanzas.html" class="btn-modulo activo">💼 Panel Finanzas</a>
+          </div>
+        </div>
+        <a href="canchas.html" class="btn btn-sec btn-chico" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.25)">Ver vista de jugador →</a>
+      </div>
+    </section>
+
+    <div id="mensaje-finanzas" class="mensaje"></div>
+
+    <!-- Barra de Período y Exportación Contable -->
+    <section class="tarjeta barra-periodo-card">
+      <div class="cabecera-seccion" style="margin-bottom:12px">
+        <div>
+          <h2 style="margin:0;font-size:1.2rem">Período de análisis financiero</h2>
+          <p class="subtitulo" id="texto-periodo-activo" style="margin:2px 0 0"></p>
+        </div>
+        <div class="acciones no-print">
+          <button type="button" class="btn btn-sec btn-chico" id="btn-exportar-csv">📥 Exportar Excel / CSV</button>
+          <button type="button" class="btn btn-sec btn-chico" id="btn-imprimir-balance">🖨️ Imprimir Balance</button>
+        </div>
+      </div>
+
+      <div class="periodo-controles no-print">
+        <div class="periodo-pills" id="botones-periodo">
+          <button type="button" class="btn-periodo" data-periodo="hoy">Hoy</button>
+          <button type="button" class="btn-periodo" data-periodo="semana">Últimos 7 días</button>
+          <button type="button" class="btn-periodo activo" data-periodo="mes">Este Mes</button>
+          <button type="button" class="btn-periodo" data-periodo="anio">Este Año</button>
+          <button type="button" class="btn-periodo" data-periodo="todo">Histórico Completo</button>
+        </div>
+        <div class="periodo-fechas-custom">
+          <div class="campo">
+            <label for="fin-desde">Desde</label>
+            <input type="date" id="fin-desde">
+          </div>
+          <div class="campo">
+            <label for="fin-hasta">Hasta</label>
+            <input type="date" id="fin-hasta">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 Tarjetas KPI de Balance Financiero (Ingresos - Gastos = Neto) -->
+    <section class="finanzas-kpis">
+      <article class="kpi-fin-card kpi-ingresos">
+        <div class="kpi-fin-top">
+          <span>Ingresos por Reservas</span>
+          <span class="kpi-fin-icono">📈</span>
+        </div>
+        <strong id="kpi-fin-ingresos">$0</strong>
+        <small id="kpi-fin-ingresos-detalle">0 reservas confirmadas · 0 hs</small>
+      </article>
+
+      <article class="kpi-fin-card kpi-gastos">
+        <div class="kpi-fin-top">
+          <span>Gastos Registrados</span>
+          <span class="kpi-fin-icono">📉</span>
+        </div>
+        <strong id="kpi-fin-gastos">$0</strong>
+        <small id="kpi-fin-gastos-detalle">0 gastos en el período</small>
+      </article>
+
+      <article class="kpi-fin-card kpi-neto" id="card-kpi-neto">
+        <div class="kpi-fin-top">
+          <span>Ganancia Neta (Ingresos - Gastos)</span>
+          <span class="kpi-fin-icono" id="icono-kpi-neto">💰</span>
+        </div>
+        <strong id="kpi-fin-neto">$0</strong>
+        <small id="kpi-fin-neto-detalle">Caja disponible descontando gastos</small>
+      </article>
+
+      <article class="kpi-fin-card kpi-margen">
+        <div class="kpi-fin-top">
+          <span>Rentabilidad sobre Ingresos</span>
+          <span class="kpi-fin-icono">📊</span>
+        </div>
+        <strong id="kpi-fin-margen">0%</strong>
+        <div class="barra-relacion-wrap">
+          <div class="barra-relacion-ingresos" id="barra-proporcion-neto" style="width:100%"></div>
+        </div>
+        <small id="kpi-fin-margen-detalle">Relación ingresos vs. gastos</small>
+      </article>
+    </section>
+
+    <!-- Gráficos visuales: Gastos por Categoría e Ingresos por Cancha -->
+    <section class="grilla-analitica-finanzas">
+      <div class="tarjeta">
+        <h2>Distribución de gastos por categoría</h2>
+        <p class="subtitulo">Impacto de cada categoría sobre los egresos e ingresos del club.</p>
+        <div id="grafico-categorias-gastos"></div>
+      </div>
+
+      <div class="tarjeta">
+        <h2>Ingresos generados por cancha</h2>
+        <p class="subtitulo">Recaudación y horas vendidas por cada cancha en el período.</p>
+        <div id="grafico-ingresos-canchas"></div>
+      </div>
+    </section>
+
+    <!-- Formulario para Registrar / Editar un Gasto (con Categoría Descriptiva) -->
+    <section class="tarjeta no-print" id="seccion-form-gasto">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+        <div>
+          <h2 id="titulo-form-gasto" style="margin:0">Registrar nuevo gasto del club</h2>
+          <p class="subtitulo" style="margin:4px 0 0">Cada gasto registrado se descuenta automáticamente de los ingresos para calcular la ganancia neta.</p>
+        </div>
+        <button type="button" class="btn btn-sec btn-chico" id="btn-nueva-categoria-gasto">➕ Agregar categoría descriptiva</button>
+      </div>
+
+      <form id="form-gasto">
+        <input type="hidden" id="gasto-edit-id" value="">
+        <div class="grilla-form-admin" style="margin-bottom:14px">
+          <div class="campo" style="grid-column: span 2">
+            <label for="gasto-concepto">Concepto / Descripción detallada del gasto</label>
+            <input type="text" id="gasto-concepto" placeholder="Ej: Compra de 10 bolsas de arena de sílice, Factura de luz, Tubos de pelotas..." required>
+          </div>
+          <div class="campo">
+            <label for="gasto-categoria">Categoría descriptiva</label>
+            <select id="gasto-categoria" required></select>
+          </div>
+          <div class="campo">
+            <label for="gasto-monto">Monto del gasto ($)</label>
+            <input type="number" id="gasto-monto" min="1" max="100000000" step="1" placeholder="Ej: 15000" required>
+          </div>
+        </div>
+
+        <div class="grilla-form-admin">
+          <div class="campo">
+            <label for="gasto-fecha">Fecha del gasto</label>
+            <input type="date" id="gasto-fecha" required>
+          </div>
+          <div class="campo">
+            <label for="gasto-metodo">Medio de pago</label>
+            <select id="gasto-metodo">
+              <option value="Efectivo / Caja">💵 Efectivo / Caja</option>
+              <option value="Transferencia">🏦 Transferencia Bancaria / MP</option>
+              <option value="Tarjeta / Débito">💳 Tarjeta Débito / Crédito</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="gasto-comprobante">Comprobante / Referencia (opcional)</label>
+            <input type="text" id="gasto-comprobante" placeholder="Ej: Factura A-00125 o Recibo #14">
+          </div>
+          <div class="acciones">
+            <button type="submit" class="btn" id="btn-guardar-gasto">💾 Registrar gasto</button>
+            <button type="button" class="btn btn-sec oculto" id="btn-cancelar-gasto">Cancelar edición</button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Listado de Gastos Registrados y Flujo de Caja Completo -->
+    <section class="tarjeta">
+      <div class="cabecera-seccion">
+        <div class="admin-tabs" style="margin-bottom:0">
+          <button type="button" class="admin-tab activo" id="subtab-gastos">📋 Gastos Registrados</button>
+          <button type="button" class="admin-tab" id="subtab-flujo">🔄 Flujo de Caja (Ingresos vs. Gastos)</button>
+        </div>
+      </div>
+
+      <!-- Vista 1: Tabla de Gastos con filtros por categoría y buscador -->
+      <div id="vista-tabla-gastos" style="margin-top:16px">
+        <div class="filtros-admin no-print">
+          <div class="campo">
+            <label for="filtro-cat-gasto">Filtrar por categoría</label>
+            <select id="filtro-cat-gasto"></select>
+          </div>
+          <div class="campo">
+            <label for="filtro-buscar-gasto">Buscar por concepto o comprobante</label>
+            <input type="text" id="filtro-buscar-gasto" placeholder="Escribir para filtrar...">
+          </div>
+        </div>
+        <div class="tabla-admin-wrap" id="contenedor-tabla-gastos"></div>
+      </div>
+
+      <!-- Vista 2: Flujo de Caja unificado (Ingresos + Egresos) -->
+      <div id="vista-tabla-flujo" class="oculto" style="margin-top:16px">
+        <p class="subtitulo">Detalle cronológico de todos los ingresos por reservas confirmadas y los egresos por gastos del período.</p>
+        <div class="tabla-admin-wrap" id="contenedor-tabla-flujo"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="pie" class="pie"></footer>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <script src="js/utils.js"></script>
+  <script src="js/datos.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/canchas.js"></script>
+  <script src="js/reservas.js"></script>
+  <script src="js/finanzas.js"></script>
+  <script src="js/pantallas/finanzas.js"></script>
+</body>
+
+</html>
+

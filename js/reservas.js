@@ -165,6 +165,20 @@ function maxTurnosLibresDesde(canchaId, fecha, horaInicio) {
 
 // ---------- reservar ----------
 
+// busca si el jugador ya tiene otra reserva confirmada que se superponga en el mismo horario
+// (aunque sea en otra cancha distinta)
+function buscarConflictoHorarioUsuario(usuarioId, fecha, horaInicio, cantidadTurnos) {
+  const nuevoFin = horaInicio + cantidadTurnos;
+  const conflicto = obtenerReservas().find(function (r) {
+    if (r.usuarioId !== usuarioId || r.fecha !== fecha || r.estado !== 'confirmada') {
+      return false;
+    }
+    const rFin = obtenerHoraFin(r);
+    return r.horaInicio < nuevoFin && horaInicio < rFin;
+  });
+  return conflicto || null;
+}
+
 // permite reservar entre 1 y 4 turnos consecutivos en el mismo día
 // devuelve { ok: true, reserva } o { ok: false, mensaje, alternativas }
 function reservarTurno(canchaId, fecha, horaInicio, cantidadTurnos, usuarioOpcionalId) {
@@ -175,6 +189,8 @@ function reservarTurno(canchaId, fecha, horaInicio, cantidadTurnos, usuarioOpcio
   if (usuario === null) {
     return { ok: false, mensaje: 'Tenés que iniciar sesión para reservar', alternativas: [] };
   }
+
+  const idUsuarioReserva = usuarioOpcionalId ? Number(usuarioOpcionalId) : usuario.id;
 
   const cancha = buscarCancha(canchaId);
   if (cancha === null || !cancha.activa) {
@@ -193,6 +209,20 @@ function reservarTurno(canchaId, fecha, horaInicio, cantidadTurnos, usuarioOpcio
     return {
       ok: false,
       mensaje: 'El rango horario supera el horario de cierre del club (23:00 hs)',
+      alternativas: horasLibres(canchaId, fecha)
+    };
+  }
+
+  // Validación: un mismo jugador no puede tener dos reservas en distintas canchas en el mismo horario
+  const conflictoUsuario = buscarConflictoHorarioUsuario(idUsuarioReserva, fecha, horaInicio, cantidadTurnos);
+  if (conflictoUsuario !== null) {
+    const otraCancha = buscarCancha(conflictoUsuario.canchaId);
+    const nombreOtraCancha = otraCancha ? otraCancha.nombre : 'Cancha #' + conflictoUsuario.canchaId;
+    return {
+      ok: false,
+      mensaje: 'Ya tenés una reserva confirmada en ' + nombreOtraCancha + ' de ' +
+        formatearHora(conflictoUsuario.horaInicio) + ' a ' + formatearHora(obtenerHoraFin(conflictoUsuario)) +
+        ' hs. No podés reservar dos canchas en el mismo horario.',
       alternativas: horasLibres(canchaId, fecha)
     };
   }
@@ -222,7 +252,7 @@ function reservarTurno(canchaId, fecha, horaInicio, cantidadTurnos, usuarioOpcio
   const precioUnitario = precioHoraCancha(cancha);
   const reserva = {
     id: nuevoId(obtenerReservas()),
-    usuarioId: usuarioOpcionalId ? Number(usuarioOpcionalId) : usuario.id,
+    usuarioId: idUsuarioReserva,
     jugadorNombre: usuario.nombre,
     jugadorTelefono: usuario.telefono || '',
     canchaId: canchaId,
@@ -237,6 +267,13 @@ function reservarTurno(canchaId, fecha, horaInicio, cantidadTurnos, usuarioOpcio
   try {
     guardarReserva(reserva);
   } catch (error) {
+    if (error && error.message === 'usuario con turno superpuesto') {
+      return {
+        ok: false,
+        mensaje: 'Ya tenés una reserva confirmada en ese horario en otra cancha. Elegí otro horario.',
+        alternativas: horasLibres(canchaId, fecha)
+      };
+    }
     return { ok: false, mensaje: mensajeTomado, alternativas: horasLibres(canchaId, fecha) };
   }
 

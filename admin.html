@@ -12,17 +12,26 @@
   <header id="barra" class="barra"></header>
 
   <main class="contenedor">
-    <!-- Cabecera del Panel Administrador -->
+    <!-- Cabecera del Panel Administrador con Selector de Módulos -->
     <section class="club-banner">
       <div class="club-info">
-        <span class="club-badge-top">Panel de Control · Perfil Administrador</span>
-        <h1>Administración PadelYa Center</h1>
+        <span class="club-badge-top">Panel de Control · Módulo Operativo</span>
+        <h1>Panel de Canchas y Reservas</h1>
         <div class="club-meta">
-          <span>📅 Gestión de reservas</span>
+          <span>📅 Reservas del día</span>
+          <span>🚫 Feriados y bloqueos</span>
+          <span>🏟️ Administración de canchas</span>
         </div>
       </div>
-      <div class="club-chips">
-        <a href="canchas.html" class="btn btn-chico">Ver vista de jugador →</a>
+      <div class="club-acciones-panel">
+        <div class="selector-modulo-banner">
+          <span class="selector-modulo-label">Seleccionar panel administrativo:</span>
+          <div class="selector-modulo-botones">
+            <a href="admin.html" class="btn-modulo activo">🏟️ Panel Canchas</a>
+            <a href="finanzas.html" class="btn-modulo">💼 Panel Finanzas</a>
+          </div>
+        </div>
+        <a href="canchas.html" class="btn btn-sec btn-chico" style="background:rgba(255,255,255,0.1);color:#fff;border-color:rgba(255,255,255,0.25)">Ver vista de jugador →</a>
       </div>
     </section>
 

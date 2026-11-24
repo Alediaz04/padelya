@@ -6,6 +6,7 @@ const CLAVE_USUARIOS = 'padelya_usuarios';
 const CLAVE_CANCHAS = 'padelya_canchas';
 const CLAVE_RESERVAS = 'padelya_reservas';
 const CLAVE_BLOQUEOS = 'padelya_bloqueos';
+const CLAVE_GASTOS = 'padelya_gastos';
 const CLAVE_CONFIG_DIAS = 'padelya_config_dias';
 const CLAVE_SESION = 'padelya_sesion';
 
@@ -14,6 +15,7 @@ const COL_USUARIOS = 'usuarios';
 const COL_CANCHAS = 'canchas';
 const COL_RESERVAS = 'reservas';
 const COL_BLOQUEOS = 'bloqueos';
+const COL_GASTOS = 'gastos';
 const COL_CONFIG = 'configuracion';
 
 // ---------- funciones generales de almacenamiento local ----------
@@ -30,6 +32,9 @@ function leerLista(clave) {
 
 function guardarLista(clave, lista) {
   localStorage.setItem(clave, JSON.stringify(lista));
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('padelya:datos-actualizados', { detail: { clave: clave } }));
+  }
 }
 
 function nuevoId(lista) {
@@ -162,7 +167,26 @@ function iniciarSincronizacionFirestore(alTerminar) {
     revisarListo();
   });
 
-  // 5. Configuración de días
+  // 5. Gastos (Finanzas)
+  db.collection(COL_GASTOS).onSnapshot(function (snapshot) {
+    if (!snapshot.empty) {
+      const lista = [];
+      snapshot.forEach(function (doc) {
+        lista.push(doc.data());
+      });
+      lista.sort(function (a, b) { return a.id - b.id; });
+      guardarLista(CLAVE_GASTOS, lista);
+    } else {
+      const gastosLocales = obtenerGastos();
+      gastosLocales.forEach(function (g) {
+        sincronizarDocFirestore(COL_GASTOS, g.id, g);
+      });
+    }
+  }, function (err) {
+    console.warn('Snapshot gastos error:', err);
+  });
+
+  // 6. Configuración de días
   db.collection(COL_CONFIG).doc('dias_semana').get().then(function (doc) {
     if (doc.exists) {
       guardarConfigDias(doc.data().config);
@@ -254,6 +278,19 @@ function guardarReserva(reserva) {
     throw new Error('turno repetido');
   }
 
+  // Validación a nivel de datos: el mismo jugador no puede reservar en dos canchas en el mismo horario
+  const conflictoUsuario = lista.find(function (r) {
+    if (r.usuarioId !== reserva.usuarioId || r.fecha !== reserva.fecha || r.estado !== 'confirmada') {
+      return false;
+    }
+    const rInicio = r.horaInicio;
+    const rFin = r.horaFin || (r.horaInicio + (r.cantidadTurnos || 1));
+    return rInicio < nuevoFin && nuevoInicio < rFin;
+  });
+  if (conflictoUsuario !== undefined) {
+    throw new Error('usuario con turno superpuesto');
+  }
+
   lista.push(reserva);
   guardarLista(CLAVE_RESERVAS, lista);
   sincronizarDocFirestore(COL_RESERVAS, reserva.id, reserva);
@@ -303,6 +340,42 @@ function borrarBloqueoPorId(id) {
   if (filtrada.length === lista.length) return false;
   guardarLista(CLAVE_BLOQUEOS, filtrada);
   borrarDocFirestore(COL_BLOQUEOS, id);
+  return true;
+}
+
+// ---------- gastos del club (Módulo Finanzas - Sprint 3) ----------
+
+function obtenerGastos() {
+  return leerLista(CLAVE_GASTOS);
+}
+
+function guardarGasto(gasto) {
+  const lista = obtenerGastos();
+  lista.push(gasto);
+  guardarLista(CLAVE_GASTOS, lista);
+  sincronizarDocFirestore(COL_GASTOS, gasto.id, gasto);
+}
+
+function actualizarGastoEnDatos(gastoActualizado) {
+  const lista = obtenerGastos();
+  const idx = lista.findIndex(function (g) {
+    return g.id === gastoActualizado.id;
+  });
+  if (idx === -1) return false;
+  lista[idx] = gastoActualizado;
+  guardarLista(CLAVE_GASTOS, lista);
+  sincronizarDocFirestore(COL_GASTOS, gastoActualizado.id, gastoActualizado);
+  return true;
+}
+
+function borrarGastoPorId(id) {
+  const lista = obtenerGastos();
+  const filtrada = lista.filter(function (g) {
+    return g.id !== id;
+  });
+  if (filtrada.length === lista.length) return false;
+  guardarLista(CLAVE_GASTOS, filtrada);
+  borrarDocFirestore(COL_GASTOS, id);
   return true;
 }
 
@@ -463,6 +536,43 @@ function cargarDatosIniciales() {
     guardarLista(CLAVE_BLOQUEOS, bloqueosIni);
     bloqueosIni.forEach(function (b) {
       sincronizarDocFirestore(COL_BLOQUEOS, b.id, b);
+    });
+  }
+
+  if (localStorage.getItem(CLAVE_GASTOS) === null) {
+    const hoy = hoyISO();
+    const gastosIni = [
+      {
+        id: 1,
+        fecha: hoy,
+        concepto: 'Compra de 6 tubos de pelotas presurizadas',
+        categoria: 'Insumos & Pelotas',
+        metodoPago: 'Transferencia',
+        monto: 18000,
+        comprobante: 'Factura A-00142'
+      },
+      {
+        id: 2,
+        fecha: hoy,
+        concepto: 'Mantenimiento y cepillado de césped sintético Cancha 1 y 2',
+        categoria: 'Mantenimiento',
+        metodoPago: 'Efectivo / Caja',
+        monto: 15000,
+        comprobante: 'Recibo #408'
+      },
+      {
+        id: 3,
+        fecha: hoy,
+        concepto: 'Proporcional energía eléctrica iluminación LED',
+        categoria: 'Servicios',
+        metodoPago: 'Transferencia',
+        monto: 12000,
+        comprobante: 'Edemsa #9921'
+      }
+    ];
+    guardarLista(CLAVE_GASTOS, gastosIni);
+    gastosIni.forEach(function (g) {
+      sincronizarDocFirestore(COL_GASTOS, g.id, g);
     });
   }
 }
